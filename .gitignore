@@ -1,0 +1,81 @@
+# -------------------------
+# Python
+# -------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+eggs/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# -------------------------
+# Virtual Environment
+# -------------------------
+venv/
+env/
+ENV/
+.venv/
+
+# -------------------------
+# Environment Variables
+# -------------------------
+.env
+.env.*
+
+# -------------------------
+# Jupyter Notebooks
+# -------------------------
+.ipynb_checkpoints/
+
+# -------------------------
+# Logs
+# -------------------------
+logs/
+*.log
+
+# -------------------------
+# Model Artifacts (Large Files)
+# -------------------------
+artifacts/
+*.pt
+*.pth
+*.pkl
+*.h5
+*.ckpt
+
+# -------------------------
+# Dataset Files
+# -------------------------
+data/raw/
+data/processed/
+*.csv
+*.zip
+
+# -------------------------
+# IDE Settings
+# -------------------------
+.vscode/
+.idea/
+
+# -------------------------
+# OS Files
+# -------------------------
+.DS_Store
+Thumbs.db
+
+# -------------------------
+# Docker
+# -------------------------
+*.tar
+
+# -------------------------
+# Pytest / Coverage
+# -------------------------
+.coverage
+htmlcov/
+.pytest_cache/
