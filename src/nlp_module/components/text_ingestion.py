@@ -1,16 +1,23 @@
 import os
 import sys
 from dataclasses import dataclass
+from pathlib import Path
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 from src.shared_utils.logger import logging
 from src.shared_utils.exception import CustomException
 
 
+BASE_DIR = Path(__file__).resolve().parents[3]
+
+
 @dataclass
 class TextIngestionConfig:
-    raw_text_path: str = os.path.join("notebook","data","text","IMDB.csv")
-    processed_text_path: str = os.path.join("artifacts","nlp", "processed_reviews.csv")
+    raw_data_path: str = str(BASE_DIR / "notebook" / "data" / "text" / "IMDB.csv")
+    artifact_raw_path: str = str(BASE_DIR / "artifacts" / "nlp" / "raw.csv")
+    train_data_path: str = str(BASE_DIR / "artifacts" / "nlp" / "train.csv")
+    test_data_path: str = str(BASE_DIR / "artifacts" / "nlp" / "test.csv")
 
 
 class TextIngestion:
@@ -21,25 +28,51 @@ class TextIngestion:
         logging.info("Text Data Ingestion started")
 
         try:
-            raw_path = self.ingestion_config.raw_text_path
+            raw_path = self.ingestion_config.raw_data_path
 
             if not os.path.exists(raw_path):
-                raise FileNotFoundError(f"Text dataset not found: {raw_path}")
+                raise FileNotFoundError(f"Dataset not found at {raw_path}")
 
+            # Load dataset
             df = pd.read_csv(raw_path)
-            logging.info(f"Dataset loaded with shape {df.shape}")
+            logging.info(f"Dataset loaded successfully with shape: {df.shape}")
+
+            # Create artifacts directory
+            os.makedirs(os.path.dirname(self.ingestion_config.train_data_path), exist_ok=True)
+
+            # Save raw copy into artifacts
+            df.to_csv(self.ingestion_config.artifact_raw_path, index=False)
+            logging.info("Raw dataset saved into artifacts")
+
+            # Validate required columns
+            if "review" not in df.columns or "sentiment" not in df.columns:
+                raise ValueError("Dataset must contain 'review' and 'sentiment' columns")
+
+            # Drop nulls
+            df.dropna(inplace=True)
 
             # Basic cleaning
-            df = df.dropna()
             df["review"] = df["review"].str.lower()
 
-            os.makedirs(os.path.dirname(self.ingestion_config.processed_text_path), exist_ok=True)
-            df.to_csv(self.ingestion_config.processed_text_path, index=False)
+            # Train-Test Split
+            train_df, test_df = train_test_split(
+                df,
+                test_size=0.2,
+                random_state=42,
+                stratify=df["sentiment"]
+            )
 
-            logging.info("Processed text data saved successfully")
+            # Save train & test
+            train_df.to_csv(self.ingestion_config.train_data_path, index=False)
+            test_df.to_csv(self.ingestion_config.test_data_path, index=False)
 
-            return self.ingestion_config.processed_text_path
+            logging.info("Train and Test files saved successfully")
+
+            return (
+                self.ingestion_config.train_data_path,
+                self.ingestion_config.test_data_path
+            )
 
         except Exception as e:
-            logging.error("Error in Text Data Ingestion")
+            logging.error("Error occurred in Text Data Ingestion")
             raise CustomException(e, sys)
