@@ -170,3 +170,6 @@ Module	          Dataset Type	          Ingestion Output
 Structured ML	     Tabular CSV	          train.csv, test.csv
 NLP	Text            CSV	train.csv,          test.csv
 GAN	Image             CSV	              processed_images.npy
+
+Data Validation Report for Strutured data:  
+  artifacts/structured/validation_report.txt

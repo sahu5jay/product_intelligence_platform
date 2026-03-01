@@ -8,7 +8,10 @@ from sklearn.model_selection import train_test_split
 from src.shared_utils.logger import logging
 from src.shared_utils.exception import CustomException
 
+# Import your cleaning function
+from src.nlp_module.components.text_cleaning import clean_text
 
+# Set base directory
 BASE_DIR = Path(__file__).resolve().parents[3]
 
 
@@ -49,10 +52,13 @@ class TextIngestion:
                 raise ValueError("Dataset must contain 'review' and 'sentiment' columns")
 
             # Drop nulls
-            df.dropna(inplace=True)
+            df.dropna(subset=["review", "sentiment"], inplace=True)
 
-            # Basic cleaning
-            df["review"] = df["review"].str.lower()
+            # Clean text column
+            logging.info("Cleaning text data...")
+            # Convert all values to string first, then clean
+            df["review"] = df["review"].astype(str).apply(clean_text)
+            logging.info("Text cleaning completed")
 
             # Train-Test Split
             train_df, test_df = train_test_split(
