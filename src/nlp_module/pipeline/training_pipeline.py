@@ -6,6 +6,7 @@ import pandas as pd
 from src.shared_utils.exception import CustomException
 from src.shared_utils.logger import logging
 from src.nlp_module.components.tokenizer_pipeline import TokenizerPipeline
+from src.nlp_module.components.dataset_builder import DatasetBuilder
 
 
 if __name__ == "__main__":
@@ -22,7 +23,6 @@ if __name__ == "__main__":
         # ------------------------------------------------
         # Load CSV files
         # ------------------------------------------------
-        logging.info("=======1Load CSV files")
         train_df = pd.read_csv(train_text_path)
         test_df = pd.read_csv(test_text_path)
 
@@ -34,7 +34,6 @@ if __name__ == "__main__":
         # ------------------------------------------------
         TEXT_COLUMN = "review"
         TARGET_COLUMN = "sentiment"
-        logging.info("=======2Load CSV files")
 
         if TEXT_COLUMN not in train_df.columns:
             raise Exception(f"{TEXT_COLUMN} not found in train dataset")
@@ -43,9 +42,7 @@ if __name__ == "__main__":
             raise Exception(f"{TARGET_COLUMN} not found in train dataset")
 
         # Extract text column
-        logging.info("=======4Load CSV files")
         train_text = train_df[TEXT_COLUMN]
-        logging.info("=======5Load CSV files")
         test_text = test_df[TEXT_COLUMN]
 
         logging.info("Text column extracted successfully")
@@ -67,6 +64,11 @@ if __name__ == "__main__":
 
         print("Train TF-IDF shape:", X_train_arr.shape)
         print("Test TF-IDF shape:", X_test_arr.shape)
+
+        data_builder_obj = DatasetBuilder()
+        train_path, test_path = data_builder_obj.build_dataset(
+            input_file_path="artifacts/nlp/raw.csv"
+        )
 
     except Exception as e:
         logging.error("Exception in NLP training pipeline")
