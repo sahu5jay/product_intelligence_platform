@@ -5,6 +5,7 @@ from src.structured_ml.components.data_validation import DataValidation
 from src.structured_ml.components.data_transformation import DataTransformation
 from src.shared_utils.logger import logging
 from src.shared_utils.exception import CustomException
+from src.structured_ml.components.model_trainer import ModelTrainer
 import sys
 
 if __name__ == "__main__":
@@ -27,11 +28,19 @@ if __name__ == "__main__":
         # Step 3: Data Transformation
         # -----------------------------
         transformation_obj = DataTransformation()
+
         train_arr, test_arr, preprocessor_path = transformation_obj.initiate_data_transformation(
             train_path=train_data_path,
             test_path=test_data_path,
             target_column="SalePrice"
         )
+
+        logging.info("Model Training started")
+
+        model_trainer_obj = ModelTrainer() 
+        logging.info("Model Training object created") 
+        
+        result_dict = model_trainer_obj.initiate_model_training(train_array = train_arr, test_array=test_arr)
 
         logging.info("Data Transformation Completed")
 
