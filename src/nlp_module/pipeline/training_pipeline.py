@@ -1,12 +1,16 @@
 # src/nlp_module/pipeline/training_pipeline.py
 
 import sys
+import os
+import joblib
 import pandas as pd
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
 
 from src.shared_utils.exception import CustomException
 from src.shared_utils.logger import logging
 from src.nlp_module.components.tokenizer_pipeline import TokenizerPipeline
-from src.nlp_module.components.dataset_builder import DatasetBuilder
 
 
 if __name__ == "__main__":
@@ -15,23 +19,17 @@ if __name__ == "__main__":
         logging.info("Starting NLP Training Pipeline")
 
         # ------------------------------------------------
-        # Paths (already saved during ingestion)
+        # Load Data
         # ------------------------------------------------
-        train_text_path = "artifacts/nlp/train.csv"
-        test_text_path = "artifacts/nlp/test.csv"
+        train_path = "artifacts/nlp/train.csv"
+        test_path = "artifacts/nlp/test.csv"
 
-        # ------------------------------------------------
-        # Load CSV files
-        # ------------------------------------------------
-        train_df = pd.read_csv(train_text_path)
-        test_df = pd.read_csv(test_text_path)
+        train_df = pd.read_csv(train_path)
+        test_df = pd.read_csv(test_path)
 
         logging.info(f"Train Shape: {train_df.shape}")
         logging.info(f"Test Shape: {test_df.shape}")
 
-        # ------------------------------------------------
-        # CHANGE THIS to your actual text column name
-        # ------------------------------------------------
         TEXT_COLUMN = "review"
         TARGET_COLUMN = "sentiment"
 
@@ -41,34 +39,60 @@ if __name__ == "__main__":
         if TARGET_COLUMN not in train_df.columns:
             raise Exception(f"{TARGET_COLUMN} not found in train dataset")
 
-        # Extract text column
-        train_text = train_df[TEXT_COLUMN]
-        test_text = test_df[TEXT_COLUMN]
+        X_train_text = train_df[TEXT_COLUMN]
+        y_train = train_df[TARGET_COLUMN]
 
-        logging.info("Text column extracted successfully")
+        X_test_text = test_df[TEXT_COLUMN]
+        y_test = test_df[TARGET_COLUMN]
+
+        logging.info("Text and Target columns extracted successfully")
 
         # ------------------------------------------------
-        # Initialize Tokenizer
+        # Tokenization + TF-IDF
         # ------------------------------------------------
         tokenizer_obj = TokenizerPipeline()
 
         X_train_arr, X_test_arr, tokenizer_path = (
             tokenizer_obj.initiate_tokenizer_transformation(
-                train_text=train_text,
-                test_text=test_text
+                train_text=X_train_text,
+                test_text=X_test_text
             )
         )
 
-        logging.info("Tokenizer transformation completed successfully")
+        logging.info("TF-IDF transformation completed")
         logging.info(f"Tokenizer saved at: {tokenizer_path}")
 
         print("Train TF-IDF shape:", X_train_arr.shape)
         print("Test TF-IDF shape:", X_test_arr.shape)
 
-        data_builder_obj = DatasetBuilder()
-        train_path, test_path = data_builder_obj.build_dataset(
-            input_file_path="artifacts/nlp/raw.csv"
-        )
+        # ------------------------------------------------
+        # Train Model
+        # ------------------------------------------------
+        model = LogisticRegression(max_iter=500)
+        model.fit(X_train_arr, y_train)
+
+        logging.info("Model training completed")
+
+        # ------------------------------------------------
+        # Evaluate Model
+        # ------------------------------------------------
+        y_pred = model.predict(X_test_arr)
+        accuracy = accuracy_score(y_test, y_pred)
+
+        logging.info(f"Model Accuracy: {accuracy}")
+        print("Model Accuracy:", accuracy)
+
+        # ------------------------------------------------
+        # Save Model
+        # ------------------------------------------------
+        os.makedirs("artifacts/nlp/model", exist_ok=True)
+
+        model_path = "artifacts/nlp/sentiment_model.pkl"
+        joblib.dump(model, model_path)
+
+        logging.info(f"Model saved at: {model_path}")
+
+        print("Training Completed Successfully")
 
     except Exception as e:
         logging.error("Exception in NLP training pipeline")

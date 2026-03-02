@@ -173,3 +173,24 @@ GAN	Image             CSV	              processed_images.npy
 
 Data Validation Report for Strutured data:  
   artifacts/structured/validation_report.txt
+
+NLP Module – Model Builder & Model Loader
+
+Feature Engineering
+TF-IDF Vectorizer
+Maximum features: 5000
+Output shape:
+Train: (40000, 5000)
+Test: (10000, 5000)
+
+Model Performance
+  Algorithm: Logistic Regression
+  Accuracy: 88.79%
+
+
+Model Loader
+
+Load saved TF-IDF vectorizer
+Load trained classification model
+Prepare pipeline for prediction
+Handle device configuration (if using transformers)
