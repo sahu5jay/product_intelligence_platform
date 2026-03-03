@@ -6,6 +6,7 @@ from src.structured_ml.components.data_transformation import DataTransformation
 from src.shared_utils.logger import logging
 from src.shared_utils.exception import CustomException
 from src.structured_ml.components.model_trainer import ModelTrainer
+from src.structured_ml.components.model_evaluation import ModelEvaluation
 import sys
 
 if __name__ == "__main__":
@@ -42,7 +43,19 @@ if __name__ == "__main__":
         
         result_dict = model_trainer_obj.initiate_model_training(train_array = train_arr, test_array=test_arr)
 
-        logging.info("Data Transformation Completed")
+        logging.info(f"Data Transformation Completed {result_dict}")
+
+        logging.info("Model Evaluation Started")
+
+        model_evaluation_obj = ModelEvaluation()
+
+        logging.info("Model Evaluation object created")
+
+        model_evaluation_report_dic = model_evaluation_obj.initiate_model_evaluation(test_array = test_arr)
+
+        logging.info(f"Model Evaluation Completed {model_evaluation_report_dic}")
+
+        logging.info("Model Evaluation Completed")
 
     except Exception as e:
         logging.error("Exception in training pipeline")
