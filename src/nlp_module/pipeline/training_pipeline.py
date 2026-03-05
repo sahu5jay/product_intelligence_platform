@@ -11,6 +11,8 @@ from sklearn.metrics import accuracy_score
 from src.shared_utils.exception import CustomException
 from src.shared_utils.logger import logging
 from src.nlp_module.components.tokenizer_pipeline import TokenizerPipeline
+from src.nlp_module.components.evaluator import ModelEvaluator
+from src.nlp_module.components.inference_engine import SentimentInferenceEngine
 
 
 if __name__ == "__main__":
@@ -93,6 +95,22 @@ if __name__ == "__main__":
         logging.info(f"Model saved at: {model_path}")
 
         print("Training Completed Successfully")
+
+        model_eval_obj = ModelEvaluator()
+
+        model_evaluation_dict = model_eval_obj.evaluate_model(
+            model=model,
+            X_test=X_test_arr,
+            y_test=y_test
+        )
+
+        print("Evaluation Metrics:", model_evaluation_dict)
+
+        text = "This movie was absolutely bad"
+
+        sentiment_infrence_obj = SentimentInferenceEngine()
+        result = sentiment_infrence_obj.predict_sentiment(text)
+        logging.info(f"----->>>{result}")
 
     except Exception as e:
         logging.error("Exception in NLP training pipeline")

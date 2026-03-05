@@ -3,7 +3,6 @@
 import os
 import sys
 from dataclasses import dataclass
-import numpy as np
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
@@ -20,7 +19,7 @@ from src.shared_utils.save_object import save_object
 @dataclass
 class TokenizerPipelineConfig:
     tokenizer_obj_file_path: str = os.path.join(
-        "artifacts", "nlp", "tfidf_vectorizer.pkl"
+        "artifacts", "nlp", "tokenizer.pkl"
     )
 
 
@@ -47,7 +46,7 @@ class TokenizerPipeline:
                         "tfidf",
                         TfidfVectorizer(
                             max_features=5000,
-                            ngram_range=(1, 2),   # unigrams + bigrams
+                            ngram_range=(1, 2),
                             stop_words="english"
                         )
                     )
@@ -73,16 +72,13 @@ class TokenizerPipeline:
 
             tokenizer_pipeline = self.get_tokenizer_pipeline()
 
-            # Fit on train
             X_train_arr = tokenizer_pipeline.fit_transform(train_text)
 
-            # Transform test if provided
             if test_text is not None:
                 X_test_arr = tokenizer_pipeline.transform(test_text)
             else:
                 X_test_arr = None
 
-            # Save tokenizer
             os.makedirs(
                 os.path.dirname(self.config.tokenizer_obj_file_path),
                 exist_ok=True
@@ -93,7 +89,7 @@ class TokenizerPipeline:
                 obj=tokenizer_pipeline
             )
 
-            logging.info("Tokenizer pipeline saved successfully")
+            logging.info(f"Tokenizer saved at {self.config.tokenizer_obj_file_path}")
 
             return X_train_arr, X_test_arr, self.config.tokenizer_obj_file_path
 
