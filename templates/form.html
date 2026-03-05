@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<title>Predict House Price</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Predict House Price</h2>
+
+<form action="/predict" method="post">
+
+<div class="grid">
+
+<div class="input-group">
+<label>Living Area (sqft)</label>
+<input type="number" name="GrLivArea" placeholder="1500" required>
+</div>
+
+<div class="input-group">
+<label>Overall Quality</label>
+<select name="OverallQual">
+<option value="3">Low</option>
+<option value="5">Average</option>
+<option value="8">High</option>
+</select>
+</div>
+
+<div class="input-group">
+<label>Year Built</label>
+<input type="number" name="YearBuilt" placeholder="2010">
+</div>
+
+<div class="input-group">
+<label>Total Basement SF</label>
+<input type="number" name="TotalBsmtSF">
+</div>
+
+<div class="input-group">
+<label>Garage Cars</label>
+<input type="number" name="GarageCars">
+</div>
+
+<div class="input-group">
+<label>Neighborhood</label>
+<select name="Neighborhood">
+<option>NAmes</option>
+<option>CollgCr</option>
+<option>OldTown</option>
+<option>Edwards</option>
+</select>
+</div>
+
+<div class="input-group">
+<label>Exterior Quality</label>
+<select name="ExterQual">
+<option>TA</option>
+<option>Gd</option>
+<option>Ex</option>
+</select>
+</div>
+
+<div class="input-group">
+<label>Kitchen Quality</label>
+<select name="KitchenQual">
+<option>TA</option>
+<option>Gd</option>
+<option>Ex</option>
+</select>
+</div>
+
+</div>
+
+<button type="submit" class="btn">Predict Price</button>
+
+</form>
+
+{% if final_result %}
+
+<div class="result">
+
+<h3>Predicted House Price</h3>
+
+<p>$ {{ final_result }}</p>
+
+</div>
+
+{% endif %}
+
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>

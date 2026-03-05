@@ -2,26 +2,19 @@
 
 import os
 import sys
-import pickle
+import joblib
+
 from src.shared_utils.exception import CustomException
 from src.shared_utils.logger import logging
 
 
 def save_object(file_path: str, obj: object):
-    """
-    Save a Python object to a file using pickle.
 
-    Args:
-        file_path (str): Path where the object will be saved
-        obj (object): Python object to save
-    """
     try:
-        # Ensure directory exists
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-        with open(file_path, 'wb') as file_obj:
-            pickle.dump(obj, file_obj)
-        
+        joblib.dump(obj, file_path)
+
         logging.info(f"Object saved successfully at {file_path}")
 
     except Exception as e:

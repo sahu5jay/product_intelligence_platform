@@ -5,11 +5,9 @@ import joblib
 from dataclasses import dataclass
 from pathlib import Path
 from sklearn.metrics import (
-    accuracy_score,
-    precision_score,
-    recall_score,
-    f1_score,
-    classification_report
+    r2_score,
+    mean_squared_error,
+    mean_absolute_error
 )
 
 from src.shared_utils.logger import logging
@@ -24,7 +22,6 @@ class ModelEvaluationConfig:
     model_path: str = str(
         BASE_DIR / "artifacts" / "structured" / "model.pkl"
     )
-
     evaluation_report_path: str = str(
         BASE_DIR / "artifacts" / "structured" / "model_evaluation_report.json"
     )
@@ -38,42 +35,25 @@ class ModelEvaluation:
     def initiate_model_evaluation(self, test_array):
 
         try:
-            logging.info("Model evaluation started")
+            logging.info("Model evaluation started (Regression)")
 
-            # Load trained model
             model = joblib.load(self.config.model_path)
 
-            # Split features and target
             X_test, y_test = test_array[:, :-1], test_array[:, -1]
 
-            # Make predictions
             y_pred = model.predict(X_test)
 
-            # Calculate metrics
-            accuracy = accuracy_score(y_test, y_pred)
-            precision = precision_score(y_test, y_pred, average="weighted")
-            recall = recall_score(y_test, y_pred, average="weighted")
-            f1 = f1_score(y_test, y_pred, average="weighted")
-
-            class_report = classification_report(
-                y_test,
-                y_pred,
-                output_dict=True
-            )
+            r2 = r2_score(y_test, y_pred)
+            mse = mean_squared_error(y_test, y_pred)
+            mae = mean_absolute_error(y_test, y_pred)
 
             results = {
-                "accuracy": accuracy,
-                "precision": precision,
-                "recall": recall,
-                "f1_score": f1,
-                "classification_report": class_report
+                "r2_score": r2,
+                "mean_squared_error": mse,
+                "mean_absolute_error": mae
             }
 
-            # Save evaluation report
-            os.makedirs(
-                os.path.dirname(self.config.evaluation_report_path),
-                exist_ok=True
-            )
+            os.makedirs(os.path.dirname(self.config.evaluation_report_path), exist_ok=True)
 
             with open(self.config.evaluation_report_path, "w") as f:
                 json.dump(results, f, indent=4)
