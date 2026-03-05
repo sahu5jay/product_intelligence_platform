@@ -10,6 +10,7 @@ from sklearn.metrics import accuracy_score
 
 from src.shared_utils.exception import CustomException
 from src.shared_utils.logger import logging
+from src.nlp_module.components.text_ingestion import TextIngestion
 from src.nlp_module.components.tokenizer_pipeline import TokenizerPipeline
 from src.nlp_module.components.evaluator import ModelEvaluator
 from src.nlp_module.components.inference_engine import SentimentInferenceEngine
@@ -18,7 +19,12 @@ from src.nlp_module.components.inference_engine import SentimentInferenceEngine
 if __name__ == "__main__":
 
     try:
+
+
         logging.info("Starting NLP Training Pipeline")
+
+        text_ingestion = TextIngestion()
+        train_data, test_data = text_ingestion.initiate_text_ingestion()
 
         # ------------------------------------------------
         # Load Data

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ML Project Home</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            display: block;
+            width: 250px;
+            margin: 15px auto;
+            padding: 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4facfe;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #0077ff;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Machine Learning Project</h1>
+
+    <button class="btn" onclick="location.href='/predict'">
+        Structured Data Prediction
+    </button>
+
+    <button class="btn" onclick="location.href='/text'">
+        Sentiment Analysis (NLP)
+    </button>
+
+    <button class="btn" onclick="location.href='/about'">
+        About Project
+    </button>
+
+</div>
+
+</body>
+</html>
