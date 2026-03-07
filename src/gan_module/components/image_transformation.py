@@ -9,23 +9,30 @@ from src.shared_utils.logger import logging
 from src.shared_utils.exception import CustomException
 
 
-BASE_DIR = Path(__file__).resolve().parents[3]
-
+# ==========================================
+# Configuration
+# ==========================================
 
 @dataclass
 class ImageTransformationConfig:
 
-    transformed_dir: str = str(BASE_DIR / "artifacts" / "gan" / "transformed_images")
+    transformed_dir: str = str(
+        Path("artifacts") / "gan" / "transformed_images"
+    )
 
     image_size: tuple = (128, 128)
 
+
+# ==========================================
+# Image Transformation Component
+# ==========================================
 
 class ImageTransformation:
 
     def __init__(self):
         self.config = ImageTransformationConfig()
 
-    def initiate_image_transformation(self, input_path):
+    def initiate_image_transformation(self, input_path: str):
 
         logging.info("Image Transformation Started")
 
@@ -36,10 +43,10 @@ class ImageTransformation:
             if not input_path.exists():
                 raise FileNotFoundError(f"Input file not found: {input_path}")
 
+            # load numpy array
             images = np.load(input_path)
 
             output_dir = Path(self.config.transformed_dir)
-
             os.makedirs(output_dir, exist_ok=True)
 
             transformed_count = 0

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Generate Images</title>
+</head>
+
+<body>
+
+<h2>Generate GAN Images</h2>
+
+<form action="/generate" method="POST">
+
+<label>Number of Images:</label>
+
+<input type="number" name="num_images" value="5">
+
+<button type="submit">Generate</button>
+
+</form>
+
+<hr>
+
+{% if images %}
+
+<h3>Generated Images</h3>
+
+{% for img in images %}
+
+<div style="margin:10px; display:inline-block">
+
+<img src="{{ img }}" width="200">
+
+<br>
+
+<a href="{{ img }}" download>
+<button>Download</button>
+</a>
+
+</div>
+
+{% endfor %}
+
+{% endif %}
+
+</body>
+</html>

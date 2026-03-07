@@ -1,4 +1,4 @@
-# src/structured_ml/utils/save_object.py
+# src/structured_ml/shared_utils/save_object.py
 
 import os
 import sys

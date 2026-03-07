@@ -7,10 +7,18 @@ from src.structured_ml.pipeline.prediction_pipeline import PredictPipeline as St
 # NLP
 from src.nlp_module.pipeline.prediction_pipeline import PredictPipeline
 
+# GAN
+from src.gan_module.components.evaluation import GANEvaluator
+
 from src.shared_utils.logger import logging
 
 
-application = Flask(__name__)
+MODEL_PATH = "artifacts/gan/models/generator.pth"
+
+
+application = Flask(__name__,
+    template_folder="frontend/templates",
+    static_folder="frontend/static")
 app = application
 
 
@@ -93,6 +101,22 @@ def predict_sentiment():
             'text.html',
             prediction_result="Prediction Error"
         )
+
+@app.route("/generate", methods=["GET", "POST"])
+def generate():
+
+    images = []
+
+    if request.method == "POST":
+
+        num_images = int(request.form.get("num_images", 5))
+
+        evaluator = GANEvaluator(MODEL_PATH)
+
+        images = evaluator.generate_images(num_images)
+
+    return render_template("generate.html", images=images)
+
 
 
 # --------------------------------

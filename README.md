@@ -194,3 +194,41 @@ Load saved TF-IDF vectorizer
 Load trained classification model
 Prepare pipeline for prediction
 Handle device configuration (if using transformers)
+
+
+
+
+
+GAN Module
+The GAN module is responsible for generating synthetic product images.
+
+Generator
+
+Creates synthetic images from random noise.
+
+Discriminator
+
+Evaluates whether an image is real or fake.
+
+GAN Trainer
+Handles:
+Data loading
+Training loop
+Loss computation
+Model optimization
+Logging
+
+Training Logs (Example)
+
+INFO - Generator model initialized
+INFO - Discriminator model initialized
+INFO - Loading processed image data
+
+Epoch [1/50]  D Loss: 1.8720 | G Loss: 0.5797
+Epoch [2/50]  D Loss: 1.8010 | G Loss: 1.0615
+Epoch [3/50]  D Loss: 0.7647 | G Loss: 2.4324
+Epoch [10/50] D Loss: 0.7213 | G Loss: 1.4630
+Epoch [20/50] D Loss: 1.0591 | G Loss: 1.3283
+Epoch [30/50] D Loss: 0.6911 | G Loss: 1.4786
+Epoch [40/50] D Loss: 0.9694 | G Loss: 1.7146
+Epoch [50/50] D Loss: 0.5271 | G Loss: 1.6215
