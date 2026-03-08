@@ -1,50 +1,30 @@
-# src/gan_module/components/generator.py
-
 import torch
 import torch.nn as nn
-from dataclasses import dataclass
-from pathlib import Path
-
-from src.shared_utils.logger import logging
-
-
-@dataclass
-class GeneratorConfig:
-    latent_dim: int = 100
-    img_channels: int = 1
-    feature_map_size: int = 64
-
 
 class Generator(nn.Module):
-
-    def __init__(self, config: GeneratorConfig = GeneratorConfig()):
+    def __init__(self, latent_dim=100, channels=1, feature_maps=64):
         super(Generator, self).__init__()
-
-        self.config = config
-
         self.model = nn.Sequential(
+            # Input: [latent_dim, 1, 1]
+            nn.ConvTranspose2d(latent_dim, feature_maps*8, 4, 1, 0, bias=False),
+            nn.BatchNorm2d(feature_maps*8),
+            nn.ReLU(True),
 
-            # Input: noise vector (latent_dim)
-            nn.Linear(self.config.latent_dim, 256),
-            nn.LeakyReLU(0.2),
+            nn.ConvTranspose2d(feature_maps*8, feature_maps*4, 4, 2, 1, bias=False),
+            nn.BatchNorm2d(feature_maps*4),
+            nn.ReLU(True),
 
-            nn.Linear(256, 512),
-            nn.LeakyReLU(0.2),
+            nn.ConvTranspose2d(feature_maps*4, feature_maps*2, 4, 2, 1, bias=False),
+            nn.BatchNorm2d(feature_maps*2),
+            nn.ReLU(True),
 
-            nn.Linear(512, 1024),
-            nn.LeakyReLU(0.2),
+            nn.ConvTranspose2d(feature_maps*2, feature_maps, 4, 2, 1, bias=False),
+            nn.BatchNorm2d(feature_maps),
+            nn.ReLU(True),
 
-            # Output layer
-            nn.Linear(1024, 28 * 28),
-            nn.Tanh()
+            nn.ConvTranspose2d(feature_maps, channels, 4, 2, 1, bias=False),
+            nn.Tanh()  # Output: [channels, 64, 64]
         )
 
-        logging.info("Generator model initialized")
-
     def forward(self, z):
-
-        img = self.model(z)
-
-        img = img.view(img.size(0), 1, 28, 28)
-
-        return img
+        return self.model(z)

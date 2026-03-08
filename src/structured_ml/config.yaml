@@ -1,0 +1,40 @@
+artifacts_root: artifacts/structured_ml
+
+data_ingestion:
+  dataset_path: notebook/data/structured/train.csv
+  raw_data_path: artifacts/structured_ml/data/raw.csv
+  train_data_path: artifacts/structured_ml/data/train.csv
+  test_data_path: artifacts/structured_ml/data/test.csv
+  test_size: 0.2
+  random_state: 42
+
+data_transformation:
+  preprocessor_path: artifacts/structured_ml/model/preprocessor.pkl
+  numerical_columns:
+    - GrLivArea
+    - OverallQual
+    - YearBuilt
+    - TotalBsmtSF
+    - GarageCars
+  categorical_columns:
+    - Neighborhood
+    - ExterQual
+    - KitchenQual
+
+model_trainer:
+
+  model_path: artifacts/structured_ml/model/model.pkl
+
+  n_estimators: 200
+  random_state: 42
+
+model_evaluation:
+  model_path: artifacts/structured_ml/model/model.pkl
+  evaluation_report_path: artifacts/structured_ml/report/model_evaluation_report.json
+  metrics:
+    - r2_score
+    - mean_squared_error
+    - mean_absolute_error
+
+model_saver:
+  save_path: artifacts/structured_ml/model/final_model.pkl

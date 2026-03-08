@@ -2,40 +2,47 @@
 
 import sys
 import joblib
-
+import os
 from src.shared_utils.exception import CustomException
 from src.shared_utils.logger import logging
+from src.shared_utils.config_loader import load_config
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parents[3]
+CONFIG_PATH = BASE_DIR / "src" / "nlp_module" / "config.yaml"
+config = load_config(CONFIG_PATH)
 
 
 class SentimentInferenceEngine:
-
-    def __init__(self):
-
+    def __init__(self, model_path=None, tokenizer_path=None):
         try:
-            self.model_path = "artifacts/nlp/sentiment_model.pkl"
-            self.tokenizer_path = "artifacts/nlp/tokenizer.pkl"
+            # Use config paths if not provided
+            self.model_path = model_path or str(BASE_DIR / config["inference"]["model_path"])
+            self.tokenizer_path = tokenizer_path or str(BASE_DIR / config["inference"]["tokenizer_path"])
 
-            logging.info("Loading tokenizer")
+            if not os.path.exists(self.model_path):
+                raise FileNotFoundError(f"Model file not found at {self.model_path}")
+            if not os.path.exists(self.tokenizer_path):
+                raise FileNotFoundError(f"Tokenizer file not found at {self.tokenizer_path}")
+
+            logging.info(f"Loading tokenizer from {self.tokenizer_path}")
             self.tokenizer = joblib.load(self.tokenizer_path)
 
-            logging.info("Loading sentiment model")
+            logging.info(f"Loading model from {self.model_path}")
             self.model = joblib.load(self.model_path)
 
             logging.info("Inference Engine initialized successfully")
 
         except Exception as e:
-            logging.error("Error while loading model or tokenizer")
+            logging.error("Error while initializing Inference Engine")
             raise CustomException(e, sys)
 
     def predict_sentiment(self, text):
-
         try:
-            logging.info("Transforming input text")
-
+            logging.info("Transforming input text for prediction")
             text_vector = self.tokenizer.transform([text])
-
             prediction = self.model.predict(text_vector)[0]
-
+            logging.info(f"Prediction: {prediction}")
             return prediction
 
         except Exception as e:

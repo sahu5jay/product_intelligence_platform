@@ -1,0 +1,28 @@
+artifacts_root: artifacts/gan
+
+image_ingestion:
+  raw_data_path: notebook/data/images/fashion_image.csv
+  processed_data_path: artifacts/gan/processed_images.npy
+
+image_transformation:
+  image_size: 64
+  channels: 1
+  batch_size: 64
+
+gan_model:
+  noise_dim: 100
+  feature_maps_gen: 64
+  feature_maps_disc: 64
+
+gan_training:
+  epochs: 50
+  learning_rate: 0.0002
+  beta1: 0.5
+  save_interval: 5
+
+model_paths:
+  generator_path: artifacts/gan/models/generator.pth
+  discriminator_path: artifacts/gan/models/discriminator.pth
+
+generated_images:
+  output_dir: frontend/static/generated_images

@@ -1,0 +1,15 @@
+flask
+pandas
+numpy
+scikit-learn
+torch
+torchvision
+transformers
+datasets
+pillow
+pyyaml
+schedule
+python-dotenv
+tqdm
+joblib
+gunicorn

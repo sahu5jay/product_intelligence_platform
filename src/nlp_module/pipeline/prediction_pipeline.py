@@ -14,12 +14,12 @@ class PredictPipeline:
             logging.info("Initializing NLP Prediction Pipeline")
 
             self.model_path = os.path.join(
-                "artifacts", "nlp", "sentiment_model.pkl"
+                "artifacts", "nlp", "model" , "sentiment_model.pkl"
             )
 
             self.tokenizer_path = os.path.join(
-                "artifacts", "nlp", "tokenizer.pkl"
-            )
+                "artifacts", "nlp", "model" , "tokenizer.pkl"
+            ) 
 
             logging.info("Loading tokenizer...")
             self.tokenizer = joblib.load(self.tokenizer_path)

@@ -1,0 +1,43 @@
+artifacts_root: artifacts/nlp
+
+text_ingestion:
+  dataset_path: notebook/data/text/IMDB.csv
+  raw_data_path: artifacts/nlp/data/raw.csv
+  processed_data_path: artifacts/nlp/data/processed.csv  # <- added
+
+text_cleaning:
+  lowercase: true
+  remove_punctuation: true
+  remove_stopwords: true
+
+tokenizer:
+  vocab_size: 20000
+  oov_token: "<OOV>"
+  max_length: 200
+  padding_type: post
+  trunc_type: post
+  tokenizer_path: artifacts/nlp/model/tokenizer.pkl
+
+dataset_builder:
+  train_data_path: artifacts/nlp/data/train_dataset.csv
+  test_data_path: artifacts/nlp/data/test_dataset.csv
+  test_size: 0.2
+  random_state: 42
+
+model:
+  model_type: logistic_regression
+  model_path: artifacts/nlp/model/sentiment_model.pkl
+
+training:
+  max_iter: 500
+
+evaluation:
+  metrics:
+    - accuracy
+    - f1_score
+    - precision
+    - recall
+
+inference:
+  tokenizer_path: artifacts/nlp/model/tokenizer.pkl
+  model_path: artifacts/nlp/model/sentiment_model.pkl
