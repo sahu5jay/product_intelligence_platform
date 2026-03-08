@@ -52,11 +52,34 @@ if __name__ == "__main__":
         # logging.info(f"Processed dataset saved at {processed_csv_path}")
 
         # -------------------------
-        # Step 3+: Continue with DatasetBuilder, Tokenizer, Model Training, Evaluation
+        # Step 3: Build Dataset
         # -------------------------
-        # dataset_builder = DatasetBuilder(...)
-        # tokenizer_obj = TokenizerPipeline(...)
-        # model training and evaluation...
+        
+        dataset_builder = DatasetBuilder(processed_csv_path=PROCESSED_DATA_PATH)
+        train_path, test_path = dataset_builder.build_dataset()
+        logging.info(f"Train dataset: {train_path}, Test dataset: {test_path}")
+
+        # -------------------------
+        # Step 4: Load Train/Test
+        # -------------------------
+        train_df = pd.read_csv(train_path)
+        test_df = pd.read_csv(test_path)
+
+        X_train_text = train_df[TEXT_COLUMN]
+        y_train = train_df[TARGET_COLUMN]
+        X_test_text = test_df[TEXT_COLUMN]
+        y_test = test_df[TARGET_COLUMN]
+
+        # -------------------------
+        # Step 5: Tokenization / TF-IDF
+        # -------------------------
+        tokenizer_obj = TokenizerPipeline()
+        X_train_arr, X_test_arr, tokenizer_path = tokenizer_obj.initiate_tokenizer_transformation(
+            train_text=X_train_text,
+            test_text=X_test_text
+        )
+        logging.info(f"Tokenizer saved at: {tokenizer_path}")
+        logging.info(f"Train TF-IDF shape: {X_train_arr.shape}, Test TF-IDF shape: {X_test_arr.shape}")
 
     except Exception as e:
         logging.error("Exception in NLP training pipeline")
