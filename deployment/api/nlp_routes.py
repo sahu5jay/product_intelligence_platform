@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
-from src.nlp_module.pipeline.prediction_pipeline import analyze_text
+import logging
+from src.nlp_module.pipeline.prediction_pipeline import PredictPipeline
 
 nlp_bp = Blueprint("nlp_bp", __name__)
 
@@ -9,7 +10,10 @@ def analyze_text_route():
         data = request.json
         text = data.get("text", "")
 
-        result = analyze_text(text)
+        logging.info(f"Input text: {text}")
+
+        sentiment = PredictPipeline()
+        result = sentiment.predict(text)
 
         return jsonify({
             "success": True,

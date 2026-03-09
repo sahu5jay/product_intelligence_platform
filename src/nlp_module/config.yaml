@@ -3,7 +3,7 @@ artifacts_root: artifacts/nlp
 text_ingestion:
   dataset_path: notebook/data/text/IMDB.csv
   raw_data_path: artifacts/nlp/data/raw.csv
-  processed_data_path: artifacts/nlp/data/processed.csv  # <- added
+  processed_data_path: artifacts/nlp/data/processed.csv  
 
 text_cleaning:
   lowercase: true

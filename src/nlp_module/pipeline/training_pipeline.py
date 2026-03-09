@@ -93,6 +93,7 @@ if __name__ == "__main__":
         logging.info("Model training completed")
 
         evaluator = Evaluator(config)
+
         metrics = evaluator.evaluate(
             model=model,
             X_test=X_test_arr,

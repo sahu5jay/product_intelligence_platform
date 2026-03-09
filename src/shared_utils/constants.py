@@ -4,47 +4,68 @@ from pathlib import Path
 # ===============================
 # Base Directory
 # ===============================
-BASE_DIR = Path(__file__).resolve().parents[2]  # points to project root
+BASE_DIR = Path(__file__).resolve().parents[2]
 
 # ===============================
-# Artifacts Paths
+# Artifacts Root
 # ===============================
 ARTIFACTS_ROOT = BASE_DIR / "artifacts"
 
+# ===============================
 # GAN paths
+# ===============================
 GAN_ARTIFACTS = ARTIFACTS_ROOT / "gan"
+
 PROCESSED_IMAGES_PATH = GAN_ARTIFACTS / "processed_images.npy"
 GENERATOR_MODEL_PATH = GAN_ARTIFACTS / "generator.pt"
 DISCRIMINATOR_MODEL_PATH = GAN_ARTIFACTS / "discriminator.pt"
+
 CHECKPOINTS_DIR = GAN_ARTIFACTS / "checkpoints"
 GAN_SAMPLES_DIR = GAN_ARTIFACTS / "samples"
 TRAINING_LOGS_JSON = GAN_ARTIFACTS / "training_logs.json"
 
+# ===============================
 # Structured ML paths
+# ===============================
 STRUCTURED_ARTIFACTS = ARTIFACTS_ROOT / "structured_ml"
+
 STRUCTURED_MODEL_PATH = STRUCTURED_ARTIFACTS / "model" / "model.pkl"
 PREPROCESSOR_PATH = STRUCTURED_ARTIFACTS / "model" / "preprocessor.pkl"
 STRUCTURED_METRICS_JSON = STRUCTURED_ARTIFACTS / "metrics.json"
 
+# ===============================
 # NLP paths
+# ===============================
 NLP_ARTIFACTS = ARTIFACTS_ROOT / "nlp"
-FINE_TUNED_MODEL_DIR = NLP_ARTIFACTS / "fine_tuned_model"
-TOKENIZER_DIR = NLP_ARTIFACTS / "tokenizer"
-NLP_METRICS_JSON = NLP_ARTIFACTS / "report" / "metrics.json"
 
-# New paths for raw and processed text data
+# model directory
+NLP_MODEL_DIR = NLP_ARTIFACTS / "model"
+
+# saved model + tokenizer
+NLP_MODEL_PATH = NLP_MODEL_DIR / "sentiment_model.pkl"
+NLP_TOKENIZER_PATH = NLP_MODEL_DIR / "tokenizer.pkl"
+
+# transformer model (optional)
+FINE_TUNED_MODEL_DIR = NLP_ARTIFACTS / "fine_tuned_model"
+
+# data paths
 NLP_RAW_DATA_PATH = NLP_ARTIFACTS / "data" / "raw.csv"
 NLP_PROCESSED_DATA_PATH = NLP_ARTIFACTS / "data" / "processed.csv"
 
-# Frontend generated images
+# metrics
+NLP_METRICS_JSON = NLP_ARTIFACTS / "report" / "metrics.json"
+
+# ===============================
+# Frontend Generated Images
+# ===============================
 GENERATED_IMAGES_DIR = BASE_DIR / "frontend" / "static" / "generated_images"
 
 # ===============================
 # Default GAN Hyperparameters
 # ===============================
-DEFAULT_IMAGE_SIZE = 64       # height/width of input images
-DEFAULT_CHANNELS = 1          # 1 for grayscale, 3 for RGB
-DEFAULT_LATENT_DIM = 100      # input noise dimension
+DEFAULT_IMAGE_SIZE = 64
+DEFAULT_CHANNELS = 1
+DEFAULT_LATENT_DIM = 100
 DEFAULT_FEATURE_MAPS_GEN = 64
 DEFAULT_FEATURE_MAPS_DISC = 64
 DEFAULT_BATCH_SIZE = 64

@@ -1,7 +1,7 @@
 from flask import Flask, render_template, send_from_directory
 from deployment.api.structured_routes import structured_bp
 # from deployment.api.gan_routes import gan_bp
-# from deployment.api.nlp_routes import nlp_bp
+from deployment.api.nlp_routes import nlp_bp
 
 app = Flask(
     __name__,
@@ -12,7 +12,7 @@ app = Flask(
 # Register API routes
 app.register_blueprint(structured_bp)
 # app.register_blueprint(gan_bp)
-# app.register_blueprint(nlp_bp)
+app.register_blueprint(nlp_bp)
 
 
 # -------------------

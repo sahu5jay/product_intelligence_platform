@@ -1,50 +1,51 @@
-# src/nlp_module/components/inference_engine.py
-
 import sys
 import joblib
-import os
-from src.shared_utils.exception import CustomException
+
 from src.shared_utils.logger import logging
-from src.shared_utils.config_loader import load_config
-from pathlib import Path
-
-BASE_DIR = Path(__file__).resolve().parents[3]
-CONFIG_PATH = BASE_DIR / "src" / "nlp_module" / "config.yaml"
-config = load_config(CONFIG_PATH)
+from src.shared_utils.exception import CustomException
+from src.shared_utils.constants import NLP_MODEL_PATH, TOKENIZER_PATH
 
 
-class SentimentInferenceEngine:
-    def __init__(self, model_path=None, tokenizer_path=None):
+class InferenceEngine:
+    """
+    Loads trained model and tokenizer and performs sentiment prediction
+    """
+
+    def __init__(self):
+
         try:
-            # Use config paths if not provided
-            self.model_path = model_path or str(BASE_DIR / config["inference"]["model_path"])
-            self.tokenizer_path = tokenizer_path or str(BASE_DIR / config["inference"]["tokenizer_path"])
+            logging.info("Loading NLP inference artifacts")
 
-            if not os.path.exists(self.model_path):
-                raise FileNotFoundError(f"Model file not found at {self.model_path}")
-            if not os.path.exists(self.tokenizer_path):
-                raise FileNotFoundError(f"Tokenizer file not found at {self.tokenizer_path}")
+            # Load trained model
+            self.model = joblib.load(NLP_MODEL_PATH)
 
-            logging.info(f"Loading tokenizer from {self.tokenizer_path}")
-            self.tokenizer = joblib.load(self.tokenizer_path)
+            # Load tokenizer
+            self.tokenizer = joblib.load(TOKENIZER_PATH)
 
-            logging.info(f"Loading model from {self.model_path}")
-            self.model = joblib.load(self.model_path)
-
-            logging.info("Inference Engine initialized successfully")
+            logging.info("Model and tokenizer loaded successfully")
 
         except Exception as e:
-            logging.error("Error while initializing Inference Engine")
             raise CustomException(e, sys)
 
-    def predict_sentiment(self, text):
+    def predict(self, text: str):
+
         try:
-            logging.info("Transforming input text for prediction")
-            text_vector = self.tokenizer.transform([text])
-            prediction = self.model.predict(text_vector)[0]
-            logging.info(f"Prediction: {prediction}")
-            return prediction
+            logging.info("Running inference")
+
+            # Convert input text to list
+            input_text = [text]
+
+            # Transform text using tokenizer
+            vector = self.tokenizer.transform(input_text)
+
+            # Predict sentiment
+            prediction = self.model.predict(vector)
+
+            sentiment = prediction[0]
+
+            logging.info(f"Predicted sentiment: {sentiment}")
+
+            return sentiment
 
         except Exception as e:
-            logging.error("Error during prediction")
             raise CustomException(e, sys)
