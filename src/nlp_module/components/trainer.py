@@ -1,31 +1,73 @@
-import os
 import sys
-import logging
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
-from shared_utils.utils import save_object
-from nlp_module.exception import CustomException
+
+from src.shared_utils.logger import logging
+from src.shared_utils.exception import CustomException
+from src.shared_utils.utils import save_object, ensure_dir
+from src.shared_utils.constants import NLP_ARTIFACTS
 
 
-class ModelTrainer:
-    def __init__(self):
-        self.model = LogisticRegression()
+class Trainer:
+    """
+    Trainer class responsible for training and saving NLP model.
+    """
 
-    def initiate_model_trainer(self, train_arr, test_arr):
+    def __init__(self, config: dict):
+
         try:
-            X_train, y_train = train_arr[:, :-1], train_arr[:, -1]
-            X_test, y_test = test_arr[:, :-1], test_arr[:, -1]
+            self.config = config
 
-            self.model.fit(X_train, y_train)
+            # Model configuration
+            self.model_type = config["model"]["model_type"]
+            self.model_path = config["model"]["model_path"]
 
-            y_pred = self.model.predict(X_test)
-            accuracy = accuracy_score(y_test, y_pred)
-
-            logging.info(f"Model Accuracy: {accuracy}")
-
-            save_object("artifacts/model.pkl", self.model)
-
-            return accuracy
+            # Training configuration
+            self.max_iter = config.get("training", {}).get("max_iter", 500)
 
         except Exception as e:
+            raise CustomException(e, sys)
+
+    def initiate_model_training(self, X_train, y_train):
+
+        try:
+
+            logging.info("Initializing NLP model")
+
+            # -------------------------
+            # Model Selection
+            # -------------------------
+            if self.model_type == "logistic_regression":
+
+                model = LogisticRegression(
+                    max_iter=self.max_iter,
+                    solver="liblinear"
+                )
+
+            else:
+                raise ValueError(f"Unsupported model type: {self.model_type}")
+
+            # -------------------------
+            # Training
+            # -------------------------
+            logging.info("Training model started")
+
+            model.fit(X_train, y_train)
+
+            logging.info("Model training completed")
+
+            # -------------------------
+            # Save Model
+            # -------------------------
+            ensure_dir(str(NLP_ARTIFACTS / "model"))
+
+            save_object(self.model_path, model)
+
+            logging.info(f"Model saved at {self.model_path}")
+
+            return model
+
+        except Exception as e:
+
+            logging.error("Error during model training")
+
             raise CustomException(e, sys)

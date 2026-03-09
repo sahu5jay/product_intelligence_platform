@@ -13,6 +13,9 @@ from src.nlp_module.components.text_ingestion import TextIngestion
 from src.nlp_module.components.text_cleaning import TextCleaning
 from src.nlp_module.components.tokenizer_pipeline import TokenizerPipeline
 from src.nlp_module.components.dataset_builder import DatasetBuilder
+from src.nlp_module.components.trainer import Trainer
+from src.nlp_module.components.evaluator import Evaluator
+
 from src.shared_utils.config_loader import load_config
 from src.shared_utils.constants import NLP_ARTIFACTS
 from pathlib import Path
@@ -80,6 +83,23 @@ if __name__ == "__main__":
         )
         logging.info(f"Tokenizer saved at: {tokenizer_path}")
         logging.info(f"Train TF-IDF shape: {X_train_arr.shape}, Test TF-IDF shape: {X_test_arr.shape}")
+
+        # -------------------------
+        # Step 6: Train Model
+        # -------------------------
+
+        trainer = Trainer(config)
+        model = trainer.initiate_model_training(X_train_arr, y_train)
+        logging.info("Model training completed")
+
+        evaluator = Evaluator(config)
+        metrics = evaluator.evaluate(
+            model=model,
+            X_test=X_test_arr,
+            y_test=y_test
+        )
+
+        logging.info(f"Model evaluation completed: {metrics}")
 
     except Exception as e:
         logging.error("Exception in NLP training pipeline")

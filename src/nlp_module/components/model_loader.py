@@ -1,59 +1,59 @@
 # src/nlp_module/components/model_loader.py
 
-import os
 import sys
+import os
+import joblib
 from pathlib import Path
-from dataclasses import dataclass
-
-import torch
-from transformers import AutoTokenizer, AutoModel, AutoConfig
-
 from src.shared_utils.logger import logging
 from src.shared_utils.exception import CustomException
 from src.shared_utils.config_loader import load_config
+from src.shared_utils.constants import NLP_ARTIFACTS
 
-# Base directories
-BASE_DIR = Path(__file__).resolve().parents[3]
-CONFIG_PATH = BASE_DIR / "src" / "nlp_module" / "config.yaml"
+# -------------------------
+# Load config
+# -------------------------
+CONFIG_PATH = Path(__file__).resolve().parents[2] / "config.yaml"
 config = load_config(CONFIG_PATH)
 
-
-@dataclass
-class ModelLoaderConfig:
-    # HuggingFace model name or local path
-    model_name: str = config.get("model", {}).get("model_type", "distilbert-base-uncased")
-    model_dir: str = str(BASE_DIR / "artifacts" / "nlp_model")
+MODEL_PATH = NLP_ARTIFACTS / "model" / "sentiment_model.pkl"
+TOKENIZER_PATH = NLP_ARTIFACTS / "tokenizer" / "tokenizer.pkl"
 
 
 class ModelLoader:
-    def __init__(self, model_name: str = None, model_dir: str = None):
-        try:
-            self.config = ModelLoaderConfig()
-            self.model_name = model_name or self.config.model_name
-            self.model_dir = model_dir or self.config.model_dir
-            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-            os.makedirs(self.model_dir, exist_ok=True)
-        except Exception as e:
-            logging.error("Error during ModelLoader initialization")
-            raise CustomException(e, sys)
+    """
+    Loads the trained NLP model and tokenizer for inference.
+    """
+
+    def __init__(self, model_path: Path = MODEL_PATH, tokenizer_path: Path = TOKENIZER_PATH):
+        self.model_path = Path(model_path)
+        self.tokenizer_path = Path(tokenizer_path)
 
     def load_model(self):
-        logging.info(f"Loading HuggingFace model: {self.model_name}")
-
+        """
+        Load the trained model from disk.
+        """
         try:
-            # Load tokenizer
-            tokenizer = AutoTokenizer.from_pretrained(self.model_name, cache_dir=self.model_dir)
-
-            # Load pre-trained model
-            model = AutoModel.from_pretrained(self.model_name, cache_dir=self.model_dir)
-            model.to(self.device)
-            model.eval()
-
-            logging.info(f"Model loaded successfully on device: {self.device}")
-            logging.info(f"Tokenizer and model cached at: {self.model_dir}")
-
-            return tokenizer, model
-
+            logging.info(f"Loading trained model from {self.model_path}")
+            if not self.model_path.exists():
+                raise FileNotFoundError(f"Model file not found at {self.model_path}")
+            model = joblib.load(self.model_path)
+            logging.info("Model loaded successfully")
+            return model
         except Exception as e:
-            logging.error(f"Error occurred while loading NLP model: {e}")
+            logging.error("Error loading model")
+            raise CustomException(e, sys)
+
+    def load_tokenizer(self):
+        """
+        Load the trained tokenizer from disk.
+        """
+        try:
+            logging.info(f"Loading tokenizer from {self.tokenizer_path}")
+            if not self.tokenizer_path.exists():
+                raise FileNotFoundError(f"Tokenizer file not found at {self.tokenizer_path}")
+            tokenizer = joblib.load(self.tokenizer_path)
+            logging.info("Tokenizer loaded successfully")
+            return tokenizer
+        except Exception as e:
+            logging.error("Error loading tokenizer")
             raise CustomException(e, sys)

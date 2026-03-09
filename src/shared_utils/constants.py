@@ -30,7 +30,7 @@ STRUCTURED_METRICS_JSON = STRUCTURED_ARTIFACTS / "metrics.json"
 NLP_ARTIFACTS = ARTIFACTS_ROOT / "nlp"
 FINE_TUNED_MODEL_DIR = NLP_ARTIFACTS / "fine_tuned_model"
 TOKENIZER_DIR = NLP_ARTIFACTS / "tokenizer"
-NLP_METRICS_JSON = NLP_ARTIFACTS / "metrics.json"
+NLP_METRICS_JSON = NLP_ARTIFACTS / "report" / "metrics.json"
 
 # New paths for raw and processed text data
 NLP_RAW_DATA_PATH = NLP_ARTIFACTS / "data" / "raw.csv"

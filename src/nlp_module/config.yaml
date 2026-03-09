@@ -29,7 +29,7 @@ model:
   model_path: artifacts/nlp/model/sentiment_model.pkl
 
 training:
-  max_iter: 500
+  max_iter: 50
 
 evaluation:
   metrics:
