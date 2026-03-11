@@ -10,77 +10,80 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 # Artifacts Root
 # ===============================
 ARTIFACTS_ROOT = BASE_DIR / "artifacts"
-
-# ===============================
-# GAN paths
-# ===============================
 GAN_ARTIFACTS = ARTIFACTS_ROOT / "gan"
 
-PROCESSED_IMAGES_PATH = GAN_ARTIFACTS / "processed_images.npy"
-GENERATOR_MODEL_PATH = GAN_ARTIFACTS / "generator.pt"
-DISCRIMINATOR_MODEL_PATH = GAN_ARTIFACTS / "discriminator.pt"
+# ===============================
+# Device
+# ===============================
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+# ===============================
+# GAN Data Paths
+# ===============================
+GAN_DATA_DIR = GAN_ARTIFACTS / "data"
+DATA_PATH = BASE_DIR / "notebook/data/images/fashion_image.csv"  # matches YAML
+PROCESSED_DATA_PATH = GAN_DATA_DIR / "processed_data.npy"
+
+# ===============================
+# Image Transformation / PNGs
+# ===============================
+TRANSFORMED_IMAGES_DIR = GAN_ARTIFACTS / "transformed_images"
+IMAGES_PNG_DIR = GAN_ARTIFACTS / "images_png"
+IMAGES_PNG_DIR.mkdir(parents=True, exist_ok=True)
+
+# ===============================
+# GAN Generated Images (frontend)
+# ===============================
+GENERATED_IMAGES_DIR = BASE_DIR / "frontend/static/generated_images"
+GENERATED_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+
+# ===============================
+# Models & Checkpoints
+# ===============================
+GAN_MODELS_DIR = GAN_ARTIFACTS / "models"
+GENERATOR_MODEL_PATH = GAN_MODELS_DIR / "generator.pth"
+DISCRIMINATOR_MODEL_PATH = GAN_MODELS_DIR / "discriminator.pth"
 CHECKPOINTS_DIR = GAN_ARTIFACTS / "checkpoints"
-GAN_SAMPLES_DIR = GAN_ARTIFACTS / "samples"
+
+# ===============================
+# Evaluation
+# ===============================
+GAN_EVAL_DIR = GAN_ARTIFACTS / "evaluation"
+GAN_SAMPLE_GRID = GAN_EVAL_DIR / "sample_grid.png"
+
+# ===============================
+# Logs
+# ===============================
 TRAINING_LOGS_JSON = GAN_ARTIFACTS / "training_logs.json"
+LOG_FILE = GAN_ARTIFACTS / "training.log"
 
 # ===============================
-# Structured ML paths
-# ===============================
-STRUCTURED_ARTIFACTS = ARTIFACTS_ROOT / "structured_ml"
-
-STRUCTURED_MODEL_PATH = STRUCTURED_ARTIFACTS / "model" / "model.pkl"
-PREPROCESSOR_PATH = STRUCTURED_ARTIFACTS / "model" / "preprocessor.pkl"
-STRUCTURED_METRICS_JSON = STRUCTURED_ARTIFACTS / "metrics.json"
-
-# ===============================
-# NLP paths
-# ===============================
-NLP_ARTIFACTS = ARTIFACTS_ROOT / "nlp"
-
-# model directory
-NLP_MODEL_DIR = NLP_ARTIFACTS / "model"
-
-# saved model + tokenizer
-NLP_MODEL_PATH = NLP_MODEL_DIR / "sentiment_model.pkl"
-NLP_TOKENIZER_PATH = NLP_MODEL_DIR / "tokenizer.pkl"
-
-# transformer model (optional)
-FINE_TUNED_MODEL_DIR = NLP_ARTIFACTS / "fine_tuned_model"
-
-# data paths
-NLP_RAW_DATA_PATH = NLP_ARTIFACTS / "data" / "raw.csv"
-NLP_PROCESSED_DATA_PATH = NLP_ARTIFACTS / "data" / "processed.csv"
-
-# metrics
-NLP_METRICS_JSON = NLP_ARTIFACTS / "report" / "metrics.json"
-
-# ===============================
-# Frontend Generated Images
-# ===============================
-GENERATED_IMAGES_DIR = BASE_DIR / "frontend" / "static" / "generated_images"
-
-# ===============================
-# Default GAN Hyperparameters
+# GAN Hyperparameters
 # ===============================
 DEFAULT_IMAGE_SIZE = 64
 DEFAULT_CHANNELS = 1
 DEFAULT_LATENT_DIM = 100
 DEFAULT_FEATURE_MAPS_GEN = 64
 DEFAULT_FEATURE_MAPS_DISC = 64
-DEFAULT_BATCH_SIZE = 64
-DEFAULT_EPOCHS = 50
+DEFAULT_BATCH_SIZE = 20
+DEFAULT_EPOCHS = 5
 DEFAULT_LR = 0.0002
 DEFAULT_BETA1 = 0.5
+DEFAULT_BETA2 = 0.999
+MAX_GENERATED_IMAGES = 20
 
 # ===============================
-# Logging Constants
+# Create all necessary directories
 # ===============================
-LOG_FORMAT = "%(asctime)s [%(levelname)s] - %(message)s"
-DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
-LOG_FILE = GAN_ARTIFACTS / "training.log"
-
-# ===============================
-# Device
-# ===============================
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+for path in [
+    ARTIFACTS_ROOT,
+    GAN_ARTIFACTS,
+    GAN_DATA_DIR,
+    TRANSFORMED_IMAGES_DIR,
+    GENERATED_IMAGES_DIR,
+    GAN_MODELS_DIR,
+    CHECKPOINTS_DIR,
+    GAN_EVAL_DIR,
+    IMAGES_PNG_DIR
+]:
+    path.mkdir(parents=True, exist_ok=True)

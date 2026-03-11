@@ -1,78 +1,116 @@
-# src/gan_module/components/image_transformation.py
-
-import os
 import sys
-from pathlib import Path
-from dataclasses import dataclass
+from PIL import Image
 import numpy as np
+import torch
+from torch.utils.data import DataLoader, TensorDataset
+from torchvision import transforms
+from pathlib import Path
 from PIL import Image
 
 from src.shared_utils.logger import logging
 from src.shared_utils.exception import CustomException
-from src.shared_utils.config_loader import load_config
-
-# ===============================
-# Load GAN config
-# ===============================
-BASE_DIR = Path(__file__).resolve().parents[3]
-CONFIG_PATH = BASE_DIR / "src" / "gan_module" / "config.yaml"
-config = load_config(CONFIG_PATH)
-
-# ===============================
-# Configuration Dataclass
-# ===============================
-@dataclass
-class ImageTransformationConfig:
-    transformed_dir: str = str(BASE_DIR / config["artifacts_root"] / "transformed_images")
-    image_size: tuple = (config["image_transformation"]["image_size"], config["image_transformation"]["image_size"])
-    channels: int = config["image_transformation"].get("channels", 1)
-    batch_size: int = config["image_transformation"].get("batch_size", 64)
+from src.shared_utils.utils import save_numpy
+from src.shared_utils.constants import PROCESSED_DATA_PATH, TRANSFORMED_IMAGES_DIR
+from src.shared_utils.constants import IMAGES_PNG_DIR  # <- new PNG dir constant
+from src.shared_utils.utils import save_object
 
 
-# ===============================
-# Image Transformation Class
-# ===============================
 class ImageTransformation:
 
-    def __init__(self):
-        self.config = ImageTransformationConfig()
+    def __init__(self, config):
 
-    def initiate_image_transformation(self, input_path: str):
+        self.image_size = config["image_transformation"]["image_size"]
+        self.channels = config["image_transformation"]["channels"]
+        self.batch_size = config["image_transformation"]["batch_size"]
+        self.shuffle = config["image_transformation"]["shuffle"]
+        self.num_workers = config["image_transformation"]["num_workers"]
+        self.pin_memory = config["image_transformation"]["pin_memory"]
 
-        logging.info("Image Transformation Started")
+        self.processed_data_path = PROCESSED_DATA_PATH
+
+        # Ensure PNG directory exists
+        IMAGES_PNG_DIR.mkdir(parents=True, exist_ok=True)
+
+    def initiate_image_transformation(self):
 
         try:
-            input_path = Path(input_path)
-            if not input_path.exists():
-                raise FileNotFoundError(f"Input file not found: {input_path}")
 
-            # Load numpy array
-            images = np.load(input_path)
+            logging.info("Starting Image Transformation")
 
-            output_dir = Path(self.config.transformed_dir)
-            os.makedirs(output_dir, exist_ok=True)
+            if not self.processed_data_path.exists():
+                raise FileNotFoundError(
+                    f"Processed dataset not found: {self.processed_data_path}"
+                )
 
-            transformed_count = 0
+            # -------------------------
+            # Load numpy dataset
+            # -------------------------
+            logging.info("Loading processed numpy dataset")
+            images = np.load(self.processed_data_path)
+            logging.info(f"Dataset loaded with shape: {images.shape}")
 
-            for idx, img in enumerate(images):
-                img = img.squeeze()  # Remove single-dimensional entries
+            # -------------------------
+            # Reshape pixels → images
+            # -------------------------
+            images = images.reshape(-1, 1, 28, 28)
+            logging.info("Images reshaped to 28x28 format")
 
-                # If single-channel grayscale, convert accordingly
-                if self.config.channels == 1:
-                    pil_image = Image.fromarray((img * 255).astype(np.uint8)).convert("L")
-                else:
-                    pil_image = Image.fromarray((img * 255).astype(np.uint8)).convert("RGB")
+            # -------------------------
+            # Convert to tensor
+            # -------------------------
+            images = torch.tensor(images, dtype=torch.float32)
 
-                # Resize according to config
-                pil_image = pil_image.resize(self.config.image_size)
+            # -------------------------
+            # Image Transformations
+            # -------------------------
+            transform = transforms.Compose(
+                [
+                    transforms.Resize((self.image_size, self.image_size)),
+                    transforms.Normalize((0.5,), (0.5,))
+                ]
+            )
 
-                save_path = output_dir / f"image_{idx}.png"
-                pil_image.save(save_path)
-                transformed_count += 1
+            transformed_images = [transform(img) for img in images]
+            transformed_images = torch.stack(transformed_images)
 
-            logging.info(f"{transformed_count} images transformed successfully")
-            return str(output_dir)
+            logging.info(f"Images resized to {self.image_size}x{self.image_size}")
+
+            # -------------------------
+            # Save transformed images as .npy
+            # -------------------------
+            TRANSFORMED_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+            transformed_file_path = TRANSFORMED_IMAGES_DIR / "transformed_images.npy"
+            save_numpy(transformed_file_path, transformed_images.numpy())
+            logging.info(f"Transformed images saved at {transformed_file_path}")
+
+            # -------------------------
+            # Save transformed images as PNGs
+            # -------------------------
+            for idx, img_tensor in enumerate(transformed_images):
+                # Ensure tensor shape is (H, W)
+                img = img_tensor.squeeze().detach().cpu()  # remove channel if 1, ensure CPU
+                # Denormalize from [-1, 1] → [0, 255]
+                img = (img - img.min()) / (img.max() - img.min())  # scale to [0,1]
+                img = (img * 255).numpy().astype(np.uint8)
+                # Convert to PIL Image
+                pil_img = Image.fromarray(img, mode='L')  # 'L' for grayscale
+                pil_img.save(IMAGES_PNG_DIR / f"transformed_{idx+1}.png")
+
+            # -------------------------
+            # Create Dataset & DataLoader
+            # -------------------------
+            dataset = TensorDataset(transformed_images)
+            dataloader = DataLoader(
+                dataset,
+                batch_size=self.batch_size,
+                shuffle=self.shuffle,
+                num_workers=self.num_workers,
+                pin_memory=self.pin_memory
+            )
+
+            logging.info("DataLoader created successfully")
+            return dataloader
 
         except Exception as e:
-            logging.error("Error occurred during Image Transformation")
+            logging.error("Error during image transformation")
             raise CustomException(e, sys)

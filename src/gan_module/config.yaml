@@ -1,28 +1,87 @@
+# =========================================
+# Artifacts Root
+# =========================================
 artifacts_root: artifacts/gan
 
+# =========================================
+# Image Ingestion
+# =========================================
 image_ingestion:
   raw_data_path: notebook/data/images/fashion_image.csv
-  processed_data_path: artifacts/gan/processed_images.npy
+  data_path: artifacts/gan/data/raw_data.npy
+  processed_data_path: artifacts/gan/data/processed_data.npy
 
+# =========================================
+# Image Transformation
+# =========================================
 image_transformation:
   image_size: 64
   channels: 1
   batch_size: 64
+  shuffle: true
+  normalize: true
+  num_workers: 6
+  pin_memory: true
+  save_png_dir: artifacts/gan/images_png  
 
+# =========================================
+# GAN Model Architecture
+# =========================================
 gan_model:
   noise_dim: 100
   feature_maps_gen: 64
   feature_maps_disc: 64
+  use_batchnorm: true
 
+# =========================================
+# GAN Training
+# =========================================
 gan_training:
-  epochs: 50
+  epochs: 5
   learning_rate: 0.0002
   beta1: 0.5
-  save_interval: 5
+  beta2: 0.999
 
+  label_smoothing: 0.1
+
+  gradient_clip: 0.0
+
+  train_discriminator_steps: 1
+  train_generator_steps: 1
+
+  save_interval: 20
+  sample_interval: 10
+
+# =========================================
+# Model Paths
+# =========================================
 model_paths:
   generator_path: artifacts/gan/models/generator.pth
   discriminator_path: artifacts/gan/models/discriminator.pth
+  checkpoints_dir: artifacts/gan/checkpoints
+  training_logs: artifacts/gan/training_logs.json
 
+# =========================================
+# Generated Images
+# =========================================
 generated_images:
   output_dir: frontend/static/generated_images
+  image_format: png
+  max_generate_limit: 20
+
+# =========================================
+# Evaluation
+# =========================================
+evaluation:
+  num_samples: 25
+  save_grid: true
+  grid_output: artifacts/gan/evaluation/sample_grid.png
+
+# =========================================
+# Experiment
+# =========================================
+experiment:
+  seed: 42
+  device: auto
+  mixed_precision: true
+  torch_compile: true

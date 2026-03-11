@@ -1,42 +1,77 @@
-import os
-from src.gan_module.components.image_ingestion import ImageIngestion
-from src.gan_module.components.gan_trainer import GANTrainer
-from src.gan_module.components.evaluation import GANEvaluator
-
-from src.shared_utils.logger import logging
-from src.shared_utils.exception import CustomException
 import sys
+from pathlib import Path
+
+from src.shared_utils.exception import CustomException
+from src.shared_utils.logger import logging
+from src.shared_utils.config_loader import load_config
+
+from src.gan_module.components.image_ingestion import ImageIngestion
+from src.gan_module.components.image_transformation import ImageTransformation
+from src.gan_module.components.gan_trainer import GANTrainer
+
+
+# -------------------------
+# Load Config
+# -------------------------
+
+BASE_DIR = Path(__file__).resolve().parents[2]
+
+CONFIG_PATH = BASE_DIR / "gan_module" / "config.yaml"
+
+config = load_config(CONFIG_PATH)
+
+# Dataset path from config
+RAW_DATA_PATH = config["image_ingestion"]["raw_data_path"]
 
 
 if __name__ == "__main__":
 
     try:
 
-        processed_data_path = "artifacts/gan/processed_images.npy"
+        logging.info("Starting GAN Training Pipeline")
 
-        # Step 1: Ingestion (only if not already processed)
-        if not os.path.exists(processed_data_path):
+        # -------------------------
+        # Step 1: Image Ingestion
+        # -------------------------
 
-            logging.info("Processed data not found. Running ingestion...")
+        logging.info("Step 1: Image Ingestion Started")
 
-            ingestion = ImageIngestion()
-            processed_data_path = ingestion.initiate_image_ingestion()
+        image_ingestion = ImageIngestion(
+            raw_data_path=RAW_DATA_PATH
+        )
 
-        else:
+        processed_data_path = image_ingestion.initiate_image_ingestion()
 
-            logging.info("Processed data already exists. Skipping ingestion.")
+        logging.info(f"Processed dataset saved at: {processed_data_path}")
+        logging.info("Image Ingestion Completed Successfully")
 
-        # Step 2: Training
-        trainer = GANTrainer()
-        trainer.train()
+        # -------------------------
+        # Step 2: Image Transformation
+        # -------------------------
 
-        logging.info("GAN Model Training Completed")
+        logging.info("Step 2: Image Transformation Started")
 
-        # Step 3: Evaluation
-        evaluator = GANEvaluator("artifacts/gan/models/generator.pth")
-        evaluator.generate_images(10)
+        image_transformation = ImageTransformation(config=config)
 
-        logging.info("GAN Evaluation Completed")
+        dataloader = image_transformation.initiate_image_transformation()
+
+        logging.info("Image Transformation Completed Successfully")
+
+        # # -------------------------
+        # # Step 3: GAN Training
+        # # -------------------------
+
+        logging.info("Step 3: GAN Training Started")
+
+        trainer = GANTrainer(config=config)
+
+        trainer.train(dataloader=dataloader)
+
+        logging.info("GAN Training Completed Successfully")
+
 
     except Exception as e:
+
+        logging.error("Exception occurred in GAN training pipeline")
+
         raise CustomException(e, sys)

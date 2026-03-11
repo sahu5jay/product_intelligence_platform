@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import pickle
 import json
 from pathlib import Path
@@ -63,6 +64,22 @@ def save_json(file_path: str, data: dict):
         logging.info(f"JSON saved at {file_path}")
     except Exception as e:
         logging.error(f"Error saving JSON at {file_path}")
+        raise CustomException(e, sys)
+
+# -------------------------------
+# convert csv to numpy array
+# -------------------------------
+def save_numpy(file_path: str, array: np.ndarray):
+    """
+    Save a NumPy array to a file.
+    Creates parent directories if they don't exist.
+    """
+    try:
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        np.save(file_path, array)
+        logging.info(f"NumPy array saved at {file_path}")
+    except Exception as e:
+        logging.error(f"Error saving NumPy array at {file_path}")
         raise CustomException(e, sys)
 
 # -------------------------------

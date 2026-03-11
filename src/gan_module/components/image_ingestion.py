@@ -1,61 +1,60 @@
-# src/gan_module/components/image_ingestion.py
-
-import os
 import sys
-from dataclasses import dataclass
-from pathlib import Path
 import pandas as pd
 import numpy as np
+from pathlib import Path
 
 from src.shared_utils.logger import logging
 from src.shared_utils.exception import CustomException
-from src.shared_utils.config_loader import load_config
+from src.shared_utils.constants import PROCESSED_DATA_PATH, DATA_PATH
 
-# ===============================
-# Load config
-# ===============================
-BASE_DIR = Path(__file__).resolve().parents[3]
-CONFIG_PATH = BASE_DIR / "src" / "gan_module" / "config.yaml"
-config = load_config(CONFIG_PATH)
-
-@dataclass
-class ImageIngestionConfig:
-    raw_data_path: str = str(BASE_DIR / config["image_ingestion"]["raw_data_path"])
-    processed_data_path: str = str(BASE_DIR / config["image_ingestion"]["processed_data_path"])
 
 class ImageIngestion:
 
-    def __init__(self):
-        self.ingestion_config = ImageIngestionConfig()
+    def __init__(self, raw_data_path: Path):
+        self.raw_data_path = Path(raw_data_path)
+        self.processed_data_path = PROCESSED_DATA_PATH
+        self.data_path = DATA_PATH
 
     def initiate_image_ingestion(self):
-        logging.info("Image Data Ingestion Started")
+
+        logging.info("Starting Image Ingestion")
 
         try:
-            raw_path = self.ingestion_config.raw_data_path
 
-            if not os.path.exists(raw_path):
-                raise FileNotFoundError(f"Dataset not found: {raw_path}")
+            if not self.raw_data_path.exists():
+                raise FileNotFoundError(f"Dataset not found: {self.raw_data_path}")
 
-            df = pd.read_csv(raw_path)
-            logging.info(f"Dataset loaded with shape {df.shape}")
+            logging.info(f"Reading dataset from: {self.raw_data_path}")
 
-            # Extract pixel values (all columns except first if it is ID)
-            images = df.iloc[:, 1:].values if df.shape[1] > 1 else df.values
+            df = pd.read_csv(self.raw_data_path)
 
-            # Normalize to 0-1
-            images = images / 255.0
+            logging.info(f"Dataset shape: {df.shape}")
 
-            # Reshape for CNN: (N, C, H, W)
-            images = images.reshape(-1, 1, 28, 28)
+            # Create directories BEFORE saving files
+            self.data_path.parent.mkdir(parents=True, exist_ok=True)
+            self.processed_data_path.parent.mkdir(parents=True, exist_ok=True)
 
-            os.makedirs(os.path.dirname(self.ingestion_config.processed_data_path), exist_ok=True)
-            np.save(self.ingestion_config.processed_data_path, images)
+            # Save raw dataset
+            df.to_csv(self.data_path, index=False)
+            logging.info(f"Raw dataset saved at: {self.data_path}")
 
-            logging.info(f"Processed images saved at {self.ingestion_config.processed_data_path}")
+            # Remove label column
+            if "label" in df.columns:
+                logging.info("Dropping label column")
+                df = df.drop(columns=["label"])
 
-            return self.ingestion_config.processed_data_path
+            # Convert dataframe → numpy
+            images = df.values.astype("float32")
+
+            logging.info(f"Converted dataset to numpy array: {images.shape}")
+
+            # Save processed dataset
+            np.save(self.processed_data_path, images)
+
+            logging.info(f"Processed dataset saved at: {self.processed_data_path}")
+
+            return self.processed_data_path
 
         except Exception as e:
-            logging.error("Error in Image Data Ingestion")
+            logging.error("Error occurred during image ingestion")
             raise CustomException(e, sys)
