@@ -232,3 +232,215 @@ Epoch [20/50] D Loss: 1.0591 | G Loss: 1.3283
 Epoch [30/50] D Loss: 0.6911 | G Loss: 1.4786
 Epoch [40/50] D Loss: 0.9694 | G Loss: 1.7146
 Epoch [50/50] D Loss: 0.5271 | G Loss: 1.6215
+
+
+🧠 Product Intelligence Platform
+
+An end-to-end AI platform that integrates Structured Machine Learning, Generative Adversarial Networks (GAN), and NLP to analyze product data, generate synthetic images, and perform sentiment analysis on customer reviews.
+
+The system is built using modular ML pipelines, Flask APIs, and a web interface for easy interaction.
+
+🚀 Key Features
+
+📊 Structured ML – Predict product insights from tabular data
+
+🎨 GAN Image Generation – Generate synthetic product images
+
+🧾 NLP Sentiment Analysis – Analyze customer reviews
+
+🌐 Flask API for model interaction
+
+🖥 Web UI for predictions, image generation, and analysis
+
+🐳 Docker support for deployment
+
+📝 Centralized logging and error handling
+
+📂 Project Structure
+product_intelligence_platform/
+│
+├── artifacts/              # Trained models & outputs
+│   ├── structured/
+│   ├── gan/
+│   └── nlp/
+│
+├── data/                   # Datasets
+│   ├── structured/
+│   ├── images/
+│   └── text/
+│
+├── src/
+│   ├── structured_ml/      # Structured ML pipelines
+│   ├── gan_module/         # GAN training & inference
+│   ├── nlp_module/         # NLP model training & prediction
+│   ├── shared_utils/       # Logging, constants, utilities
+│   └── orchestration/      # Training workflows
+│
+├── deployment/             # API & Docker setup
+│   └── api/
+│
+├── frontend/               # Web interface
+│   ├── templates/
+│   └── static/
+│
+├── logs/
+├── requirements.txt
+├── setup.py
+└── README.md
+⚙️ Modules
+📊 Structured ML
+
+Handles tabular data prediction using traditional machine learning.
+
+Pipeline steps:
+
+Data ingestion
+
+Data validation
+
+Data transformation
+
+Model training
+
+Model evaluation
+
+Prediction pipeline
+
+Artifacts saved in:
+
+artifacts/structured/
+🎨 GAN Module
+
+Generates synthetic product images using a Generator–Discriminator architecture.
+
+Pipeline steps:
+
+Image ingestion
+
+Data loading
+
+GAN training
+
+Generator inference
+
+Image generation
+
+Artifacts saved in:
+
+artifacts/gan/
+🧾 NLP Module
+
+Performs sentiment analysis on product reviews.
+
+Pipeline steps:
+
+Text ingestion
+
+Text cleaning
+
+Tokenization
+
+Dataset preparation
+
+Model training
+
+Inference
+
+Artifacts saved in:
+
+artifacts/nlp/
+📊 Model Evaluation
+
+Each module includes evaluation metrics.
+
+Structured ML
+
+Accuracy
+
+Precision
+
+Recall
+
+F1 Score
+
+GAN
+
+Generator loss
+
+Discriminator loss
+
+Visual inspection of generated samples
+
+NLP
+
+Accuracy
+
+Precision
+
+Recall
+
+F1 Score
+
+Evaluation results are stored in:
+
+artifacts/*/metrics.json
+🌐 API Endpoints
+
+Flask routes expose model functionality.
+
+Endpoint	Function
+/predict	Structured ML predictions
+/generate-image	Generate synthetic images
+/analyze-review	NLP sentiment analysis
+🖥 Web Interface
+
+Frontend allows users to:
+
+Predict structured data results
+
+Generate synthetic images
+
+Analyze product reviews
+
+Pages include:
+
+index.html
+predict.html
+generate.html
+analyze.html
+⚡ Installation
+
+Clone repository:
+
+git clone <repo_url>
+cd product_intelligence_platform
+
+Install dependencies:
+
+pip install -r requirements.txt
+
+Run the API server:
+
+python deployment/api/main.py
+
+Open browser:
+
+http://localhost:5000
+🛠 Tech Stack
+
+Python
+
+PyTorch
+
+Scikit-learn
+
+Flask
+
+Docker
+
+HTML / CSS / JS
+
+👨‍💻 Author
+
+Jay Sahu
+MBA | Data Analytics & Machine Learning

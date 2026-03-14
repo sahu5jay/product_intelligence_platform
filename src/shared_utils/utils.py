@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import pickle
+import joblib
 import json
 from pathlib import Path
 from src.shared_utils.logger import logging
@@ -10,18 +11,28 @@ import sys
 # -------------------------------
 # Save Python object to file
 # -------------------------------
-def save_object(file_path: str, obj):
+def save_json(file_path: str, data: dict):
     """
-    Save a Python object to a file using pickle.
-    Creates parent directories if not exist.
+    Save dictionary to JSON file.
     """
+
     try:
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        with open(file_path, "wb") as f:
-            pickle.dump(obj, f)
-        logging.info(f"Object saved at {file_path}")
+        file_path = Path(file_path)
+
+        # Ensure parent directory exists
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # If user mistakenly passes a directory, fix automatically
+        if file_path.suffix == "":
+            file_path = file_path / "output.json"
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4)
+
+        logging.info(f"JSON saved at {file_path}")
+
     except Exception as e:
-        logging.error(f"Error saving object at {file_path}")
+        logging.error(f"Error saving JSON at {file_path}")
         raise CustomException(e, sys)
 
 # -------------------------------
@@ -38,7 +49,7 @@ def load_object(file_path: str):
             raise FileNotFoundError(f"File not found: {file_path}")
 
         with open(file_path, "rb") as file_obj:
-            obj = pickle.load(file_obj)
+            obj = joblib.load(file_obj)
 
         logging.info(f"Object loaded successfully from {file_path}")
 
@@ -53,15 +64,22 @@ def load_object(file_path: str):
 # -------------------------------
 # Save dictionary to JSON file
 # -------------------------------
-def save_json(file_path: str, data: dict):
+def save_json(file_path, data: dict):
     """
     Save dictionary to JSON file.
     """
+
     try:
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        file_path = Path(file_path)
+
+        # Create directory if it doesn't exist
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4)
+
         logging.info(f"JSON saved at {file_path}")
+
     except Exception as e:
         logging.error(f"Error saving JSON at {file_path}")
         raise CustomException(e, sys)
@@ -132,3 +150,16 @@ def safe_divide(a, b, default=0):
         return a / b if b != 0 else default
     except Exception:
         return default
+
+def save_object(file_path: str, obj: object):
+
+    try:
+        # os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+        joblib.dump(obj, file_path)
+
+        logging.info(f"Object saved successfully at {file_path}")
+
+    except Exception as e:
+        logging.error(f"Error saving object at {file_path}")
+        raise CustomException(e, sys)

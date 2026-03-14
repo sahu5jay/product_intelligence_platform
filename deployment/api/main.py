@@ -1,6 +1,6 @@
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template
 from deployment.api.structured_routes import structured_bp
-# from deployment.api.gan_routes import gan_bp
+from deployment.api.gan_routes import gan_bp
 from deployment.api.nlp_routes import nlp_bp
 
 app = Flask(
@@ -9,9 +9,12 @@ app = Flask(
     static_folder="../../frontend/static"
 )
 
+# -------------------
 # Register API routes
+# -------------------
+
 app.register_blueprint(structured_bp)
-# app.register_blueprint(gan_bp)
+app.register_blueprint(gan_bp)
 app.register_blueprint(nlp_bp)
 
 
@@ -31,21 +34,15 @@ def structured_page():
 
 @app.route("/generate")
 def generate_page():
-    return render_template("generate.html")
+    """
+    Render GAN generator page
+    """
+    return render_template("generate.html", labels=[], images=[])
 
 
 @app.route("/nlp")
 def nlp_page():
     return render_template("analyze.html")
-
-
-# -------------------
-# Static Files
-# -------------------
-
-# @app.route("/static/<path:filename>")
-# def static_files(filename):
-#     return send_from_directory("../../frontend/static", filename)
 
 
 # -------------------

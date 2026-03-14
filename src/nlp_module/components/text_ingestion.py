@@ -16,8 +16,8 @@ BASE_DIR = Path(__file__).resolve().parents[3]
 CONFIG_PATH = BASE_DIR / "src/nlp_module/config.yaml"
 config = load_config(CONFIG_PATH)
 
-RAW_DATA_PATH = Path(config["text_ingestion"]["raw_data_path"])
-DATASET_PATH = Path(config["text_ingestion"]["dataset_path"])
+# RAW_DATA_PATH = Path(config["text_ingestion"]["raw_data_path"])
+# DATASET_PATH = Path(config["text_ingestion"]["dataset_path"])
 
 
 class TextIngestion:
@@ -27,28 +27,27 @@ class TextIngestion:
     - Saves a copy to artifacts for reproducibility
     """
 
-    def __init__(self, dataset_path: Path = DATASET_PATH, raw_save_path: Path = RAW_DATA_PATH):
-        self.dataset_path = dataset_path
-        self.raw_save_path = raw_save_path
+    def __init__(self, dataset_path, raw_path):
 
-        # Ensure the artifacts folder exists
-        os.makedirs(self.raw_save_path.parent, exist_ok=True)
+        self.dataset_path = dataset_path
+        self.raw_path = raw_path
 
     def initiate_text_ingestion(self):
-        """
-        Read the raw CSV and save a copy to artifacts folder.
-        Returns the path to the raw CSV.
-        """
         try:
             logging.info(f"Reading raw dataset from {self.dataset_path}")
+
             df = pd.read_csv(self.dataset_path)
+
             logging.info(f"Dataset shape: {df.shape}")
 
-            # Save a copy to artifacts/raw.csv
-            df.to_csv(self.raw_save_path, index=False)
-            logging.info(f"Raw dataset saved at {self.raw_save_path}")
+            # Ensure directory exists
+            os.makedirs(os.path.dirname(self.raw_path), exist_ok=True)
 
-            return str(self.raw_save_path)
+            df.to_csv(self.raw_path, index=False)
+
+            logging.info(f"Raw dataset saved at {self.raw_path}")
+
+            return str(self.raw_path)
 
         except Exception as e:
             logging.error("Error in text ingestion")

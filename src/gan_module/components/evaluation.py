@@ -1,82 +1,115 @@
-# src/gan_module/components/evaluation.py
-
-import os
 import sys
-from pathlib import Path
 import torch
-import numpy as np
 from torchvision.utils import save_image
 
-from dataclasses import dataclass
+from src.gan_module.models.generator import Generator
 from src.shared_utils.logger import logging
 from src.shared_utils.exception import CustomException
-from src.shared_utils.config_loader import load_config
+from src.shared_utils.utils import load_object
+from src.shared_utils.constants import (
+DEVICE,
+DEFAULT_LATENT_DIM,
+DEFAULT_CHANNELS,
+DEFAULT_FEATURE_MAPS_GEN,
+MAX_GENERATED_IMAGES,
+GENERATOR_MODEL_PATH,
+GENERATED_IMAGES_DIR,
+GAN_SAMPLE_GRID
+)
 
-from src.gan_module.components.generator import Generator
-
-# ===============================
-# Load Config
-# ===============================
-BASE_DIR = Path(__file__).resolve().parents[3]
-CONFIG_PATH = BASE_DIR / "src" / "gan_module" / "config.yaml"
-config = load_config(CONFIG_PATH)
-
-# ===============================
-# Evaluation Config Dataclass
-# ===============================
-@dataclass
-class GANEvaluationConfig:
-    latent_dim: int = config["gan_model"]["noise_dim"]
-    generator_path: str = str(BASE_DIR / config["model_paths"]["generator_path"])
-    output_dir: str = str(BASE_DIR / config["generated_images"]["output_dir"])
-    num_samples: int = 64  # Number of images to generate
-    device: str = "cuda" if torch.cuda.is_available() else "cpu"
-
-
-# ===============================
-# GAN Evaluation Class
-# ===============================
-class GANEvaluator:
+class GANEvaluation:
+    """
+    Evaluate trained GAN Generator and generate sample images
+    """
 
     def __init__(self):
-        try:
-            self.config = GANEvaluationConfig()
-            os.makedirs(self.config.output_dir, exist_ok=True)
 
-            # Load Generator
-            self.generator = Generator(latent_dim=self.config.latent_dim)
-            self.generator.load_state_dict(torch.load(self.config.generator_path, map_location=self.config.device))
-            self.generator.to(self.config.device)
+        try:
+
+            self.device = DEVICE
+            self.latent_dim = DEFAULT_LATENT_DIM
+
+            logging.info("Initializing GAN Evaluation")
+
+            # Initialize generator architecture
+            self.generator = Generator(
+                latent_dim=DEFAULT_LATENT_DIM,
+                channels=DEFAULT_CHANNELS,
+                feature_maps=DEFAULT_FEATURE_MAPS_GEN
+            ).to(self.device)
+
+            # Check if model exists
+            if not GENERATOR_MODEL_PATH.exists():
+                raise FileNotFoundError(
+                    f"Generator model not found at {GENERATOR_MODEL_PATH}"
+                )
+
+            # Load state_dict correctly
+            logging.info(f"Loading generator model from {GENERATOR_MODEL_PATH}")
+
+            state_dict = load_object(GENERATOR_MODEL_PATH)
+
+            self.generator.load_state_dict(state_dict)
+
+            self.generator.to(self.device)
             self.generator.eval()
 
-            logging.info("Generator loaded for evaluation")
+            logging.info("Generator model loaded successfully")
+
 
         except Exception as e:
-            logging.error("Error initializing GANEvaluator")
             raise CustomException(e, sys)
 
-    def generate_images(self, num_samples=None, save=True):
+
+    def generate_images(self):
+
+        """
+        Generate images using trained Generator
+        """
+
         try:
-            num_samples = num_samples or self.config.num_samples
 
-            logging.info(f"Generating {num_samples} images using the GAN")
+            logging.info("Generating images using trained GAN")
 
-            noise = torch.randn(num_samples, self.config.latent_dim, device=self.config.device)
+            noise = torch.randn(
+                MAX_GENERATED_IMAGES,
+                self.latent_dim,
+                1,
+                1,
+                device=self.device
+            )
+
             with torch.no_grad():
                 fake_images = self.generator(noise)
 
-            # Scale images to [0,1] for saving
-            fake_images = (fake_images + 1) / 2.0
+            # Save each generated image
+            for i, img in enumerate(fake_images):
 
-            if save:
-                for idx, img in enumerate(fake_images):
-                    save_path = Path(self.config.output_dir) / f"generated_{idx}.png"
-                    save_image(img, save_path)
+                save_path = GENERATED_IMAGES_DIR / f"generated_{i}.png"
 
-                logging.info(f"{num_samples} generated images saved at {self.config.output_dir}")
+                save_image(
+                    img,
+                    save_path,
+                    normalize=True
+                )
 
-            return fake_images
+            logging.info(
+                f"{MAX_GENERATED_IMAGES} images saved to {GENERATED_IMAGES_DIR}"
+            )
+
+            # Save grid image for evaluation
+            save_image(
+                fake_images,
+                GAN_SAMPLE_GRID,
+                normalize=True,
+                nrow=5
+            )
+
+            logging.info(f"Evaluation grid saved at {GAN_SAMPLE_GRID}")
 
         except Exception as e:
-            logging.error("Error during image generation")
+
+            logging.error("Error during GAN evaluation")
+
             raise CustomException(e, sys)
+

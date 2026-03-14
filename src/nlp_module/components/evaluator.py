@@ -4,7 +4,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from src.shared_utils.logger import logging
 from src.shared_utils.exception import CustomException
 from src.shared_utils.utils import save_json
-from src.shared_utils.constants import NLP_METRICS_JSON
+from src.shared_utils.constants import NLP_METRICS_PATH
 
 
 class Evaluator:
@@ -60,9 +60,9 @@ class Evaluator:
             # -------------------------
             # Save Metrics JSON
             # -------------------------
-            save_json(NLP_METRICS_JSON, metrics_result)
+            save_json(NLP_METRICS_PATH, metrics_result)
 
-            logging.info(f"Metrics saved at {NLP_METRICS_JSON}")
+            logging.info(f"Metrics saved at {NLP_METRICS_PATH}")
 
             return metrics_result
 

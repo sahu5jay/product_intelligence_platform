@@ -1,25 +1,33 @@
-from flask import Blueprint, jsonify
-from src.gan_module.pipeline.inference_pipeline import InferencePipeline
+from flask import Blueprint, request, render_template
+from src.gan_module.pipeline.inference_pipeline import GANInferencePipeline
 
 gan_bp = Blueprint("gan_bp", __name__)
 
-@gan_bp.route("/generate-image", methods=["POST"])
+@gan_bp.route("/generate", methods=["POST"])
 def generate_image_route():
 
     try:
 
+        label = request.form.get("label")
+        num_images = int(request.form.get("num_images"))
+
         pipeline = InferencePipeline()
 
-        pipeline.run_pipeline()
+        images = pipeline.generate_images(label, num_images)
 
-        return jsonify({
-            "success": True,
-            "message": "Images generated successfully"
-        })
+        labels = pipeline.get_labels()
+
+        return render_template(
+            "generate.html",
+            labels=labels,
+            images=images
+        )
 
     except Exception as e:
 
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        })
+        return render_template(
+            "generate.html",
+            labels=[],
+            images=[],
+            error=str(e)
+        )

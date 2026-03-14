@@ -5,15 +5,16 @@ from pathlib import Path
 
 from src.shared_utils.logger import logging
 from src.shared_utils.exception import CustomException
-from src.shared_utils.constants import PROCESSED_DATA_PATH, DATA_PATH
+# from src.shared_utils.constants import PROCESSED_DATA_PATH, GAN_RAW_DATA_PATH
 
 
 class ImageIngestion:
 
-    def __init__(self, raw_data_path: Path):
+    def __init__(self, gan_data_path: Path, raw_data_path: Path, processed_data_path: Path):
+        self.gan_data_path = gan_data_path
         self.raw_data_path = Path(raw_data_path)
-        self.processed_data_path = PROCESSED_DATA_PATH
-        self.data_path = DATA_PATH
+        self.processed_data_path = Path(processed_data_path)
+        # self.data_path = DATA_PATH
 
     def initiate_image_ingestion(self):
 
@@ -26,17 +27,19 @@ class ImageIngestion:
 
             logging.info(f"Reading dataset from: {self.raw_data_path}")
 
-            df = pd.read_csv(self.raw_data_path)
+            df = pd.read_csv(self.gan_data_path)
 
             logging.info(f"Dataset shape: {df.shape}")
 
             # Create directories BEFORE saving files
-            self.data_path.parent.mkdir(parents=True, exist_ok=True)
-            self.processed_data_path.parent.mkdir(parents=True, exist_ok=True)
+            logging.info("Saving Raw Data")
+            self.raw_data_path.parent.mkdir(parents=True, exist_ok=True)
+            logging.info(f"Saving Raw Data {self.raw_data_path}")
+            # self.processed_data_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Save raw dataset
-            df.to_csv(self.data_path, index=False)
-            logging.info(f"Raw dataset saved at: {self.data_path}")
+            df.to_csv(self.raw_data_path, index=False)
+            logging.info(f"Raw dataset saved at: {self.raw_data_path}")
 
             # Remove label column
             if "label" in df.columns:

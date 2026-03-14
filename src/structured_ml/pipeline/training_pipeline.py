@@ -1,6 +1,7 @@
 # src/structured_ml/pipeline/training_pipeline.py
 
 import sys
+import os
 from pathlib import Path
 from src.shared_utils.logger import logging
 from src.shared_utils.exception import CustomException
@@ -13,7 +14,11 @@ from src.structured_ml.components.model_trainer import ModelTrainer
 from src.structured_ml.components.model_evaluation import ModelEvaluation
 from src.structured_ml.components.model_saver import ModelSaver
 
-from src.shared_utils.constants import STRUCTURED_ARTIFACTS, STRUCTURED_MODEL_PATH
+from src.shared_utils.constants import PROCESSED_STRUCTURED_DATA, TRIMED_DATA_PATH, TRIMED_VALIDATION_REPORT_PATH
+from src.shared_utils.constants import STRUCTURED_ARTIFACTS, STRUCTURED_MODEL_PATH, DATA_VALIDATION_REPORT_PATH,RAW_DATA_PATH
+from src.shared_utils.constants import BASE_DIR, TRAIN_DATA_PATH, TEST_DATA_PATH, TRAIN_ARRAY_PATH, TEST_ARRAY_PATH
+from src.shared_utils.utils import save_json
+
 
 # Fixed paths
 EVAL_PATH = STRUCTURED_ARTIFACTS / "report/model_evaluation_report.json"
@@ -27,38 +32,47 @@ if __name__ == "__main__":
         # Step : Data Ingestion
         # -----------------------------
         logging.info("Step 1: Data Ingestion Started")
-        data_ingestion_obj = DataIngestion()
-        raw_path, train_path, test_path = data_ingestion_obj.initiate_data_ingestion()
-        logging.info(f"Data Ingestion Completed: Raw={raw_path}, Train={train_path}, Test={test_path}")
+        logging.info(f"Step 1: Data Ingestion Started {BASE_DIR}")
+        data_ingestion_obj = DataIngestion(raw_data_path = RAW_DATA_PATH)
+        raw_path = data_ingestion_obj.initiate_data_ingestion()
+        logging.info(f"Data Ingestion Completed: Raw={raw_path}")
 
         # -----------------------------
         # Step : Data Validation
         # -----------------------------
         logging.info("Step 2: Data Validation Started")
-        data_validation_obj = DataValidation(raw_path)
+        data_validation_obj = DataValidation(raw_data_path = PROCESSED_STRUCTURED_DATA, validation_report_path = DATA_VALIDATION_REPORT_PATH)
         validation_report = data_validation_obj.validate_data()
+        # os.makedirs(os.path.dirname(DATA_VALIDATION_REPORT_PATH), exist_ok=True)
+        # save_json(DATA_VALIDATION_REPORT_PATH, validation_report)
         logging.info(f"Data Validation Completed. Report: {validation_report}")
 
-        if validation_report["status"] == "Invalid":
-            logging.warning("Data Validation Failed: Missing Columns Detected. Check validation report before proceeding.")
+        # if validation_report["status"] == "Invalid":
+        #     logging.warning("Data Validation Failed: Missing Columns Detected. Check validation report before proceeding.")
 
         # -----------------------------
         # Step : Data Transformation
         # -----------------------------
         logging.info("Step 3: Data Transformation Started")
         data_transformation_obj = DataTransformation()
-        train_arr, test_arr, preprocessor_path = data_transformation_obj.initiate_data_transformation(
-            train_path, test_path
-        )
+        train_arr, test_arr, preprocessor_path = data_transformation_obj.initiate_data_transformation()
         logging.info("Data Transformation Completed.")
         logging.info(f"Preprocessor saved at {preprocessor_path}")
+
+
+        logging.info("Step 4: Data Validation Started")
+        data_validation_obj = DataValidation(raw_data_path = TRIMED_DATA_PATH, validation_report_path = TRIMED_VALIDATION_REPORT_PATH)
+        validation_report = data_validation_obj.validate_data()
+        # os.makedirs(os.path.dirname(DATA_VALIDATION_REPORT_PATH), exist_ok=True)
+        # save_json(DATA_VALIDATION_REPORT_PATH, validation_report)
+        logging.info(f"Data Validation Completed. Report: {validation_report}")
 
         # -----------------------------
         # Step : Model Training
         # -----------------------------
         logging.info("Step 4: Model Training Started")
-        model_trainer_obj = ModelTrainer()
-        trainer_output = model_trainer_obj.initiate_model_training(train_arr, test_arr)
+        model_trainer_obj = ModelTrainer(train_dataset = TRAIN_ARRAY_PATH, test_dataset = TEST_ARRAY_PATH)
+        trainer_output = model_trainer_obj.initiate_model_training()
 
         # Correct keys
         r2_train = trainer_output["r2_train"]

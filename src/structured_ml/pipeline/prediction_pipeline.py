@@ -5,7 +5,7 @@ import pandas as pd
 from src.shared_utils.logger import logging
 from src.shared_utils.exception import CustomException
 from src.shared_utils.utils import load_object
-from src.shared_utils.constants import STRUCTURED_MODEL_PATH, PREPROCESSOR_PATH
+from src.shared_utils.constants import FINAL_MODEL_PATH, PREPROCESSOR_PATH
 
 
 class PredictPipeline:
@@ -14,7 +14,7 @@ class PredictPipeline:
     and generating predictions for new data.
     """
 
-    def __init__(self, model_path: str = STRUCTURED_MODEL_PATH, preprocessor_path: str = PREPROCESSOR_PATH):
+    def __init__(self, model_path: str = FINAL_MODEL_PATH, preprocessor_path: str = PREPROCESSOR_PATH):
         try:
             logging.info("Loading trained model and preprocessor")
             self.model = load_object(model_path)
@@ -92,3 +92,30 @@ class CustomData:
         except Exception as e:
             logging.error("Exception occurred while creating DataFrame from user input")
             raise CustomException(e, sys)
+
+# if __name__ == "__main__":
+    # try:
+
+    #     # Example user input
+    #     data = CustomData(
+    #         GrLivArea=2000,
+    #         OverallQual=7,
+    #         YearBuilt=2005,
+    #         TotalBsmtSF=850,
+    #         GarageCars=2,
+    #         Neighborhood="CollgCr",
+    #         ExterQual="Gd",
+    #         KitchenQual="Gd"
+    #     )
+
+    #     # Convert to dataframe
+    #     pred_df = data.get_data_as_dataframe()
+
+    #     # Run prediction pipeline
+    #     pipeline = PredictPipeline()
+    #     prediction = pipeline.predict(pred_df)
+
+    #     print("Predicted House Price:", prediction[0])
+
+    # except Exception as e:
+    #     raise CustomException(e, sys)

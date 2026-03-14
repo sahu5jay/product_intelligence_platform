@@ -3,8 +3,10 @@ from sklearn.linear_model import LogisticRegression
 
 from src.shared_utils.logger import logging
 from src.shared_utils.exception import CustomException
+# from src.shared_utils import save_object
 from src.shared_utils.utils import save_object, ensure_dir
-from src.shared_utils.constants import NLP_ARTIFACTS
+from src.shared_utils.constants import TRAIN_DATA_PATH, TEST_DATA_PATH
+from src.shared_utils.constants import NLP_MODEL_DIR, NLP_SENTIMENT_DIR
 
 
 class Trainer:
@@ -19,7 +21,7 @@ class Trainer:
 
             # Model configuration
             self.model_type = config["model"]["model_type"]
-            self.model_path = config["model"]["model_path"]
+            # self.model_path = config["model"]["model_path"]
 
             # Training configuration
             self.max_iter = config.get("training", {}).get("max_iter", 500)
@@ -58,11 +60,11 @@ class Trainer:
             # -------------------------
             # Save Model
             # -------------------------
-            ensure_dir(str(NLP_ARTIFACTS / "model"))
+            # ensure_dir(str(NLP_ARTIFACTS / "model"))
 
-            save_object(self.model_path, model)
+            save_object(NLP_SENTIMENT_DIR, model)
 
-            logging.info(f"Model saved at {self.model_path}")
+            logging.info(f"Model saved at {NLP_SENTIMENT_DIR}")
 
             return model
 

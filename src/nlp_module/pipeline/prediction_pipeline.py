@@ -3,7 +3,7 @@ import joblib
 
 from src.shared_utils.exception import CustomException
 from src.shared_utils.logger import logging
-from src.shared_utils.constants import NLP_MODEL_PATH, NLP_TOKENIZER_PATH
+from src.shared_utils.constants import NLP_SENTIMENT_DIR, NLP_TOKENIZER_DIR
 
 
 class PredictPipeline:
@@ -13,12 +13,12 @@ class PredictPipeline:
             logging.info("Initializing NLP Prediction Pipeline")
 
             # Load tokenizer
-            logging.info(f"Loading tokenizer from {NLP_TOKENIZER_PATH}")
-            self.tokenizer = joblib.load(NLP_TOKENIZER_PATH)
+            logging.info(f"Loading tokenizer from {NLP_TOKENIZER_DIR}")
+            self.tokenizer = joblib.load(NLP_TOKENIZER_DIR)
 
             # Load model
-            logging.info(f"Loading model from {NLP_MODEL_PATH}")
-            self.model = joblib.load(NLP_MODEL_PATH)
+            logging.info(f"Loading model from {NLP_SENTIMENT_DIR}")
+            self.model = joblib.load(NLP_SENTIMENT_DIR)
 
             logging.info("Model and tokenizer loaded successfully")
 
@@ -43,7 +43,6 @@ class PredictPipeline:
 
             result = prediction[0]
 
-            # Convert numeric label to sentiment
             label_map = {
                 0: "Negative",
                 1: "Positive"
@@ -58,3 +57,12 @@ class PredictPipeline:
         except Exception as e:
             logging.error("Error during prediction")
             raise CustomException(e, sys)
+
+
+if __name__ == "__main__":
+
+    predictor = PredictPipeline()
+
+    result = predictor.predict("I LOVE YOU")
+
+    print("Predicted Sentiment:", result)

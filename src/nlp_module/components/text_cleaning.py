@@ -9,7 +9,7 @@ from nltk.corpus import stopwords
 from src.shared_utils.logger import logging
 from src.shared_utils.exception import CustomException
 from src.shared_utils.config_loader import load_config
-from src.shared_utils.constants import NLP_RAW_DATA_PATH, NLP_PROCESSED_DATA_PATH
+# from src.shared_utils.constants import
 
 # Ensure NLTK stopwords are downloaded
 import nltk
@@ -22,10 +22,9 @@ class TextCleaning:
     The cleaned text will overwrite the 'review' column in the processed CSV.
     """
 
-    def __init__(self, raw_data_path: Path = NLP_RAW_DATA_PATH, processed_data_path: Path = NLP_PROCESSED_DATA_PATH):
+    def __init__(self, raw_data_path, processed_data_path):
         self.raw_data_path = Path(raw_data_path)
         self.processed_data_path = Path(processed_data_path)
-        os.makedirs(self.processed_data_path.parent, exist_ok=True)
 
     @staticmethod
     def clean_text(text: str) -> str:
@@ -52,6 +51,8 @@ class TextCleaning:
 
             logging.info("Cleaning text data...")
             df["review"] = df["review"].apply(self.clean_text)
+
+            os.makedirs(self.processed_data_path.parent, exist_ok=True)
 
             # Save cleaned CSV
             df.to_csv(self.processed_data_path, index=False)

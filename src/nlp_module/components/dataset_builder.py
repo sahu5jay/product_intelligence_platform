@@ -8,7 +8,7 @@ from pathlib import Path
 from src.shared_utils.logger import logging
 from src.shared_utils.exception import CustomException
 from src.shared_utils.config_loader import load_config
-from src.shared_utils.constants import NLP_ARTIFACTS, BASE_DIR
+from src.shared_utils.constants import NLP_ARTIFACTS, BASE_DIR, TRAIN_DATA_PATH, TEST_DATA_PATH
 
 # ------------------------------
 # Load config from src/nlp_module/config.yaml
@@ -17,8 +17,6 @@ CONFIG_PATH = BASE_DIR / "src" / "nlp_module" / "config.yaml"
 config = load_config(CONFIG_PATH)
 
 DATASET_CONFIG = config["dataset_builder"]
-TRAIN_DATA_PATH = Path(DATASET_CONFIG["train_data_path"])
-TEST_DATA_PATH = Path(DATASET_CONFIG["test_data_path"])
 TEST_SIZE = DATASET_CONFIG.get("test_size", 0.2)
 RANDOM_STATE = DATASET_CONFIG.get("random_state", 42)
 
@@ -31,7 +29,7 @@ class DatasetBuilder:
     def __init__(self, processed_csv_path: Path):
         self.processed_csv_path = Path(processed_csv_path)
         # Ensure the parent folder for train/test exists
-        os.makedirs(TRAIN_DATA_PATH.parent, exist_ok=True)
+        # os.makedirs(TRAIN_DATA_PATH.parent, exist_ok=True)
 
     def build_dataset(self):
         try:

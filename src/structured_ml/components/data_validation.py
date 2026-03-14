@@ -21,9 +21,10 @@ NUMERIC_COLUMNS = config["data_transformation"]["numerical_columns"]
 CATEGORICAL_COLUMNS = config["data_transformation"]["categorical_columns"]
 
 class DataValidation:
-    def __init__(self, raw_data_path: str):
+    def __init__(self, raw_data_path: str, validation_report_path: str):
+
         self.raw_data_path = Path(raw_data_path)
-        self.validation_report_path = VALIDATION_REPORT_PATH
+        self.validation_report_path = Path(validation_report_path)
 
     def validate_data(self):
         """
@@ -41,10 +42,10 @@ class DataValidation:
 
             df = pd.read_csv(self.raw_data_path)
 
-            # 1️⃣ Missing Values Check
+            #  Missing Values Check
             missing_values = df.isnull().sum().to_dict()
 
-            # 2️⃣ Columns Check
+            #  Columns Check
             missing_numeric_cols = [col for col in NUMERIC_COLUMNS if col not in df.columns]
             missing_categorical_cols = [col for col in CATEGORICAL_COLUMNS if col not in df.columns]
 
@@ -60,7 +61,7 @@ class DataValidation:
 
             # Ensure report directory exists
             os.makedirs(os.path.dirname(self.validation_report_path), exist_ok=True)
-            save_json(str(self.validation_report_path), validation_report)
+            save_json(self.validation_report_path, validation_report)
 
             logging.info(f"Data validation report saved at {self.validation_report_path}")
 

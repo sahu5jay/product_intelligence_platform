@@ -1,42 +1,84 @@
-# src/gan_module/pipeline/inference_pipeline.py
-
 import sys
 import os
+import torch
+import uuid
+from torchvision.utils import save_image
 
-from src.gan_module.components.evaluation import GANEvaluator
 from src.shared_utils.logger import logging
 from src.shared_utils.exception import CustomException
+from src.shared_utils.constants import (
+    GENERATOR_MODEL_PATH,
+    GENERATED_IMAGES_DIR,
+    DEFAULT_LATENT_DIM,
+    DEVICE
+)
+
+from src.gan_module.models.generator import Generator
 
 
-class InferencePipeline:
+class GANInferencePipeline:
+    """
+    Pipeline to generate images using trained GAN model
+    """
 
     def __init__(self):
 
-        self.model_path = "artifacts/gan/models/generator.pth"
-        self.num_images = 10
-
-    def run_pipeline(self):
-
         try:
+            logging.info("Initializing GAN Inference Pipeline")
 
-            if not os.path.exists(self.model_path):
-                raise FileNotFoundError(
-                    f"Trained model not found at {self.model_path}"
-                )
+            self.device = DEVICE
+            self.latent_dim = DEFAULT_LATENT_DIM
 
-            logging.info("Starting GAN inference pipeline")
+            # Load Generator Model
+            self.generator = Generator().to(self.device)
 
-            evaluator = GANEvaluator(self.model_path)
+            if not os.path.exists(GENERATOR_MODEL_PATH):
+                raise Exception("Generator model not found")
 
-            evaluator.generate_images(self.num_images)
+            self.generator.load_state_dict(
+                torch.load(GENERATOR_MODEL_PATH, map_location=self.device)
+            )
 
-            logging.info("Image generation completed successfully")
+            self.generator.eval()
+
+            logging.info("Generator model loaded successfully")
 
         except Exception as e:
             raise CustomException(e, sys)
 
+    def generate_images(self, label: str, num_images: int):
 
-if __name__ == "__main__":
+        """
+        Generate images based on selected label
+        """
 
-    pipeline = InferencePipeline()
-    pipeline.run_pipeline()
+        try:
+
+            logging.info(f"Generating {num_images} images for label {label}")
+
+            os.makedirs(GENERATED_IMAGES_DIR, exist_ok=True)
+
+            image_paths = []
+
+            for i in range(num_images):
+
+                noise = torch.randn(1, self.latent_dim, 1, 1).to(self.device)
+
+                with torch.no_grad():
+                    fake_image = self.generator(noise)
+
+                file_name = f"{label}_{uuid.uuid4().hex}.png"
+
+                save_path = os.path.join(GENERATED_IMAGES_DIR, file_name)
+
+                save_image(fake_image, save_path, normalize=True)
+
+                image_paths.append(f"/static/generated/{file_name}")
+
+            logging.info("Images generated successfully")
+
+            return image_paths
+
+        except Exception as e:
+            logging.error("Error in image generation")
+            raise CustomException(e, sys)

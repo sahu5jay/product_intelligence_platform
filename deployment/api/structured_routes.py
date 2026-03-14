@@ -39,4 +39,5 @@ def predict_route():
 
     except Exception as e:
         logging.error(e)
+        
         return render_template("predict.html", final_result="Prediction Error")
